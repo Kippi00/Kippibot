@@ -1,2 +1,4 @@
-node_modules
-config.json
+node_modules/
+config.js
+.eslintrc.json
+data/

@@ -4,11 +4,23 @@
   "description": "Bot for Discord/Twitch",
   "main": "index.js",
   "dependencies": {
+    "chalk": "^4.1.0",
     "discord.js": "^12.5.1",
-    "enmap": "^5.8.4"
+    "enmap": "^5.8.4",
+    "inquirer": "^7.3.3",
+    "moment": "^2.29.1",
+    "moment-duration-format": "^2.3.2"
+  },
+  "engines": {
+    "node": ">=12"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kippi00/Kippibot.git"
   },
   "devDependencies": {},
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Nicholas Caro",
