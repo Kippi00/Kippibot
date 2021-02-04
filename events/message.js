@@ -41,7 +41,7 @@ module.exports = async (client, message) => {
       user: message.author.id,
       guild: message.guild.id,
       xp: 0,
-      level: 1
+      level: 0
     });
 
     //Increase user's XP by a random amount from 1 to 30.
@@ -52,9 +52,11 @@ module.exports = async (client, message) => {
     // Calculate the user's current level, and adjust if needed.
     const currentLevel = Math.floor(0.1 * Math.sqrt(client.userProfiles.get(key, "xp")));
     if (currentLevel > client.userProfiles.get(key, "level")) {
+      const settings = client.getSettings(message.member.guild);
+      const nickname = (message.member.nickname) ? message.member.nickname : message.author.username;
       client.userProfiles.inc(key, "level");
       // Send the level up message in the channel of the user's last message.
-      const levelUpMessage = client.settings.levelUpMessage.replace("{{user}}", message.author.tag).replace("{{level}}", currentLevel);
+      const levelUpMessage = settings.levelUpMessage.replace("{{user}}", message.author.username).replace("{{level}}", currentLevel).replace("{{nick}}", nickname);
       message.channel.send(levelUpMessage);
     }
 

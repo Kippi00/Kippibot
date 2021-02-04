@@ -5,13 +5,13 @@ exports.run = async(client, message, args, level) => { // eslint-disable-line no
     message.react('❔')
     return message.reply("Inavlid user specified, please mention a user to ban.");
   }
-  const member = message.guild.members.cache.find(m => m.id === user.id);
+  const member = await message.guild.members.cache.find(m => m.id === user.id);
   if (!member) {
     return message.reply("Inavlid user specified, please mention a user to ban.");
   }
   const reason = args.slice(1).join(" ");
   try {
-    await member.kick(reason)
+    await member.kick(reason);
   } catch (e) {
     message.react('❌');
     return message.channel.send(`Failed to kick user **${member.user.tag}**. Reason: ${e}`);

@@ -38,7 +38,7 @@ exports.conf = {
 
 exports.help = {
   name: "8ball",
-  category: "Fun/Miscellaneous",
+  category: "Fun",
   description: "Get your local 8-ball prediction here! You may or may not like the results. YMMV.",
   usage: "8ball [message]"
 };

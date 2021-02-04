@@ -41,7 +41,7 @@ client.aliases = new Enmap();
 // essentially saves a collection to disk. This is great for per-server configs,
 // and makes things extremely easy for this purpose.
 client.settings = new Enmap({name: "settings"});
-client.userProfiles = new Enamp({name: "userProfiles"});
+client.userProfiles = new Enmap({name: "userProfiles"});
 
 // Used for command cooldowns and in XP system.
 client.recentChatters = new Set();
