@@ -48,7 +48,7 @@ module.exports = (client) => {
     "welcomeEnabled": "false",
     "twitchDefaultAnnouncements": "streaming",
     "leaveMessage": "Everyone bid farewell to **{{user}}**... we will miss you 😭",
-    "levelUpMessage": "**{{user}}** has leveled up to level {{level}}!"
+    "levelUpMessage": "**{{nick}}** has leveled up to level {{level}}!"
   };
 
   // getSettings merges the client defaults with the guild settings. guild settings in
