@@ -2,6 +2,8 @@
 // Note that due to the binding of client to every event, every event
 // goes `client, other, args` when this function is run.
 
+const { MessageEmbed } = require("discord.js"); // eslint-disable-line no-unused-vars
+
 module.exports = async (client, message) => {
   // It's good practice to ignore other bots. This also makes your bot ignore itself
   // and not get into a spam loop (we call that "botception").
@@ -17,6 +19,47 @@ module.exports = async (client, message) => {
     return message.reply(`My prefix on this guild is \`${settings.prefix}\``);
   }
 
+  if (!message.guild) await client.logger.log(`Recieved DM from ${message.author.tag}: ${message.content}`);
+
+  // If the member on a guild is invisible or not cached, fetch them.
+  if (message.guild && !message.member) await message.guild.members.fetch(message.author);
+
+  // XP system. 
+  // It is only enabled in guilds, and there is a check in place to make sure the bot 
+  // can send messages to announce when a user levels up.
+  // This is also where the recentChatters set comes into play. To combat spam, if the user
+  // sends a message while on cooldown, they will not get XP.
+  if (message.guild && message.channel.permissionsFor(client.user).has("SEND_MESSAGES") && 
+  !client.recentChatters.has(message.author.id)) {
+    // Add user to recent chatters, then remove them after 2.5 seconds.
+    client.recentChatters.add(message.author.id);
+    setTimeout(() => {
+      client.recentChatters.delete(message.author.id)
+    }, 2500);
+    const key = `${message.guild.id}-${message.author.id}`;
+    client.userProfiles.ensure(key, {
+      user: message.author.id,
+      guild: message.guild.id,
+      xp: 0,
+      level: 1
+    });
+
+    //Increase user's XP by a random amount from 1 to 30.
+
+    const xpAmount = Math.max(1, Math.floor(Math.random() * 30));
+    client.userProfiles.math(key, "+", xpAmount, "xp");
+    
+    // Calculate the user's current level, and adjust if needed.
+    const currentLevel = Math.floor(0.1 * Math.sqrt(client.userProfiles.get(key, "xp")));
+    if (currentLevel > client.userProfiles.get(key, "level")) {
+      client.userProfiles.inc(key, "level");
+      // Send the level up message in the channel of the user's last message.
+      const levelUpMessage = client.settings.levelUpMessage.replace("{{user}}", message.author.tag).replace("{{level}}", currentLevel);
+      message.channel.send(levelUpMessage);
+    }
+
+  }
+
   // Also good practice to ignore any message that does not start with our prefix,
   // which is set in the configuration file.
   if (message.content.indexOf(settings.prefix) !== 0) return;
@@ -27,9 +70,6 @@ module.exports = async (client, message) => {
   // args = ["Is", "this", "the", "real", "life?"]
   const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
   const command = args.shift().toLowerCase();
-
-  // If the member on a guild is invisible or not cached, fetch them.
-  if (message.guild && !message.member) await message.guild.members.fetch(message.author);
 
   // Get the user or member's permission level from the elevation
   const level = client.permlevel(message);

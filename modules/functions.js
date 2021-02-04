@@ -44,8 +44,11 @@ module.exports = (client) => {
     "adminRole": "Administrator",
     "systemNotice": "true",
     "welcomeChannel": "welcome",
-    "welcomeMessage": "Say hello to {{user}}, everyone! We all need a warm welcome sometimes :D",
-    "welcomeEnabled": "false"
+    "welcomeMessage": "Say hello to **{{user}}**, everyone! We all need a warm welcome sometimes :D",
+    "welcomeEnabled": "false",
+    "twitchDefaultAnnouncements": "streaming",
+    "leaveMessage": "Everyone bid farewell to **{{user}}**... we will miss you 😭",
+    "levelUpMessage": "**{{user}}** has leveled up to level {{level}}!"
   };
 
   // getSettings merges the client defaults with the guild settings. guild settings in
@@ -81,6 +84,20 @@ module.exports = (client) => {
       return false;
     }
   };
+
+  client.getUserFromMention = (mention) => {
+    if (!mention) return;
+
+    if (mention.startsWith("<@") && mention.endsWith(">")) {
+      mention = mention.slice(2, -1);
+
+      if (mention.startsWith("!")) {
+        mention = mention.slice(1);
+      }
+
+      return client.users.cache.get(mention);
+    }
+  }
 
 
   /*
