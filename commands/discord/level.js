@@ -35,8 +35,8 @@ exports.run = async(client, message, args, level) => { // eslint-disable-line no
     const nickname = (member.nickname) ? member.nickname : target.username;
   
     const embed = new MessageEmbed()
-      .setThumbnail(message.author.avatarURL())
-      .setAuthor(nickname, message.author.avatarURL())
+      .setThumbnail(target.avatarURL())
+      .setAuthor(nickname, target.avatarURL())
       .setTitle(target.username)
       .addField("Level", currentLevel)
       .addField("XP", currentXp)

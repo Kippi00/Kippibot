@@ -9,7 +9,8 @@
     "enmap": "^5.8.4",
     "inquirer": "^7.3.3",
     "moment": "^2.29.1",
-    "moment-duration-format": "^2.3.2"
+    "moment-duration-format": "^2.3.2",
+    "twitch-js": "^2.0.0-beta.42"
   },
   "engines": {
     "node": ">=12"

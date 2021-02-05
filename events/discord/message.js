@@ -78,7 +78,7 @@ module.exports = async (client, message) => {
 
   // Check whether the command, or alias, exist in the collections defined
   // in app.js.
-  const cmd = client.commands.get(command) || client.commands.get(client.aliases.get(command));
+  const cmd = client.discordCommands.get(command) || client.discordCommands.get(client.discordAliases.get(command));
   // using this const varName = thing OR otherThing; is a pretty efficient
   // and clean way to grab one of 2 values!
   if (!cmd) return;

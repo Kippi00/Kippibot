@@ -9,6 +9,8 @@ if (Number(process.version.slice(1).split(".")[0]) < 12) throw new Error("Node 1
 
 // Load up the discord.js library
 const Discord = require("discord.js");
+// Load up thw Twitch-JS library
+const Twitch = require("twitch-js");
 // We also load the rest of the things we need in this file:
 const { promisify } = require("util");
 const readdir = promisify(require("fs").readdir);
@@ -25,8 +27,10 @@ const client = new Discord.Client({
 });
 
 // Here we load the config file that contains our token and our prefix values.
-client.config = config
-// client.config.token contains the bot's token
+client.config = config;
+// client.config.discordToken contains the bot's discord token
+// client.config.twitchClientID contains the bot's twitch client ID
+// client.config.twitchClientSecret containts the bot's twitch client secret 
 // client.config.prefix contains the message prefix
 
 // Require our logger
@@ -38,8 +42,8 @@ require("./modules/functions.js")(client);
 
 // Aliases and commands are put in collections where they can be read from,
 // catalogued, listed, etc.
-client.commands = new Enmap();
-client.aliases = new Enmap();
+client.discordCommands = new Enmap();
+client.discordAliases = new Enmap();
 
 // Now we integrate the use of Evie's awesome EnMap module, which
 // essentially saves a collection to disk. This is great for per-server configs,
@@ -57,21 +61,21 @@ const init = async () => {
 
   // Here we load **commands** into memory, as a collection, so they're accessible
   // here and everywhere else.
-  const cmdFiles = await readdir("./commands/");
+  const cmdFiles = await readdir("./commands/discord");
   client.logger.log(`Loading a total of ${cmdFiles.length} commands.`);
   cmdFiles.forEach(f => {
     if (!f.endsWith(".js")) return;
-    const response = client.loadCommand(f);
+    const response = client.loadCommand(f, "discord");
     if (response) console.log(response);
   });
 
   // Then we load events, which will include our message and ready event.
-  const evtFiles = await readdir("./events/");
+  const evtFiles = await readdir("./events/discord");
   client.logger.log(`Loading a total of ${evtFiles.length} events.`);
   evtFiles.forEach(file => {
     const eventName = file.split(".")[0];
-    client.logger.log(`Loading Event: ${eventName}`);
-    const event = require(`./events/${file}`);
+    client.logger.log(`Loading Discord Event: ${eventName}`);
+    const event = require(`./events/discord/${file}`);
     // Bind the client to any event, before the existing arguments
     // provided by the discord.js event. 
     // This line is awesome by the way. Just sayin'.
@@ -86,7 +90,7 @@ const init = async () => {
   }
 
   // Here we login the client.
-  client.login(client.config.token);
+  client.login(client.config.discordToken);
 
 // End top-level async/await function.
 };

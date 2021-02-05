@@ -4,7 +4,7 @@ exports.run = async(client, message, args, level) => { // eslint-disable-line no
     message.react('❔');
     return message.reply("Inavlid user specified, please mention a user to ban.");
   }
-  const member = message.guild.members.cache.find(m => m.id === user.id);
+  const member = message.guild.members.cache.find(m => m.id === user.id).catch(console.error);
   if (!member) {
     return message.reply("Inavlid user specified, please make sure that person is in the server.");
   }
