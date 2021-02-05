@@ -11,7 +11,7 @@ exports.conf = {
 
 exports.help = {
   name: "Command Name",
-  catgory: "Unknown",
+  category: "Unknown",
   description: "It's a command.",
   usage: "command"
-}
+};

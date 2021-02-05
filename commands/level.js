@@ -56,7 +56,7 @@ exports.conf = {
 
 exports.help = {
   name: "level",
-  catgory: "Fun",
+  category: "Fun",
   description: "See yours or someone else's current stats.",
   usage: "level (mention)"
 };
