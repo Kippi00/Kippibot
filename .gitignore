@@ -1,4 +1,5 @@
 node_modules/
 config.js
+twitchtokens.js
 .eslintrc.json
 data/

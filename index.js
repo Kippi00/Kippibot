@@ -9,13 +9,18 @@ if (Number(process.version.slice(1).split(".")[0]) < 12) throw new Error("Node 1
 
 // Load up the discord.js library
 const Discord = require("discord.js");
-// Load up thw Twitch-JS library
-const Twitch = require("twitch-js");
+
+// Twitch library
+const { ApiClient } = require("twitch");
+const { ChatClient } = require("twitch-chat-client");
+const { RefreshableAuthProvider, StaticAuthProvider } = require("twitch-auth");
+
 // We also load the rest of the things we need in this file:
 const { promisify } = require("util");
 const readdir = promisify(require("fs").readdir);
 const Enmap = require("enmap");
 const config = require("./config.js");
+const { cmd } = require("./modules/Logger.js");
 
 // This is your client. Some people call it `bot`, some people call it `self`,
 // some might call it `cootchie`. Either way, when you see `client.something`,
@@ -28,13 +33,85 @@ const client = new Discord.Client({
 
 // Here we load the config file that contains our token and our prefix values.
 client.config = config;
+
 // client.config.discordToken contains the bot's discord token
-// client.config.twitchClientID contains the bot's twitch client ID
-// client.config.twitchClientSecret containts the bot's twitch client secret 
 // client.config.prefix contains the message prefix
+
+const twitchTokens = require('./twitchtokens.js');
+const clientID = twitchTokens.config.clientID;
+const clientSecret = twitchTokens.config.clientSecret;
+const botName = twitchTokens.config.botName;
+const channelName = twitchTokens.config.channelName;
+
+client.twitchTokens = new Enmap({name: "twitchTokens"});
+
+// If an access token is not in the database, create it.
+client.twitchTokens.ensure(botName, {
+  "accessToken": twitchTokens.config.botAccessToken,
+  "refreshToken": twitchTokens.config.botRefreshToken,
+  "expiryTimestamp": twitchTokens.config.expiryTimestamp
+});
+client.twitchTokens.ensure(channelName, {
+  "accessToken": twitchTokens.config.channelAccessToken,
+  "refreshToken": twitchTokens.config.channelRefreshToken,
+  "expiryTimestamp": twitchTokens.config.channelExpiryTimestamp
+});
+
+const botAccessToken = client.twitchTokens.get(botName, "accessToken");
+const botRefreshToken = client.twitchTokens.get(botName, "refreshToken");
+const botExpiryTimestamp = client.twitchTokens.get(botName, "expiryTimestamp");
+const channelAccessToken = client.twitchTokens.get(channelName, "accessToken");
+const channelRefreshToken = client.twitchTokens.get(channelName, "refreshToken");
+const channelExpiryTimestamp = client.twitchTokens.get(channelName, "expiryTimestamp");
+
+
+
+// Twitch Auth
+const botAuth = new RefreshableAuthProvider(
+  new StaticAuthProvider(clientID, botAccessToken), {
+    clientSecret,
+    refreshToken: botRefreshToken,
+    expiry: botExpiryTimestamp === null ? null : new Date(botExpiryTimestamp),
+    onRefresh: async ({ accessToken, refreshToken, expiryDate}) => {
+      const newTokenData = {
+        "accessToken": accessToken,
+        "refreshToken": refreshToken,
+        "expiryTimestamp": expiryDate === null ? null : expiryDate.getTime()
+      };
+      await client.twitchTokens.set(botName, newTokenData);
+    }
+  }
+);
+
+const channelAuth = new RefreshableAuthProvider(
+  new StaticAuthProvider(clientID, channelAccessToken), {
+    clientSecret,
+    refreshToken: channelRefreshToken,
+    expiry: channelExpiryTimestamp === null ? null : new Date(channelExpiryTimestamp),
+    onRefresh: async ({ accessToken, refreshToken, expiryDate}) => {
+      const newTokenData = {
+        "accessToken": accessToken,
+        "refreshToken": refreshToken,
+        "expiryTimestamp": expiryDate === null ? null : expiryDate.getTime()
+      };
+      await client.twitchTokens.set(channelName, newTokenData);
+    }
+  }
+);
+
+const chatClient = new ChatClient(botAuth, {
+  channels: [channelName.toLowerCase()]
+});
+
+const apiClient = new ApiClient({ 
+  authProvider: channelAuth
+});
+
+chatClient.channelAuth = channelAuth;
 
 // Require our logger
 client.logger = require("./modules/Logger");
+chatClient.logger = require("./modules/Logger");
 
 // Let's start by getting some useful functions that we'll use throughout
 // the bot, like logs and elevation features.
@@ -90,8 +167,48 @@ const init = async () => {
   }
 
   // Here we login the client.
-  client.login(client.config.discordToken);
+  await client.login(client.config.discordToken);
+  await chatClient.connect();
+  
+  chatClient.onJoin((channel, user) => {
+    client.logger.log(`${user} is joining channel ${channel}`);
+  });
 
+  chatClient.onMessage(async (channel, user, message) => {
+    if (message === 'foo') {
+      chatClient.say(channel, 'bar');
+    } else if (message === '!ping') {
+      chatClient.say(channel, 'Pong!');
+    } else if (message === '!title') {
+      try {
+        const user = await apiClient.helix.users.getUserByName(channel.slice(1));
+        const id = user.id;
+        const channelInfo = await apiClient.helix.channels.getChannelInfo(id);
+        const title = channelInfo.title;
+        chatClient.say(channel, `Status: ${title}`);
+      } catch (e) {
+        chatClient.logger.error(e);
+        chatClient.say(channel, "Status: [API ERROR]");
+      }
+    } else if (message === '!testupdate') {
+      try {
+        const user = await apiClient.helix.users.getUserByName(channel.slice(1));
+        const id = user.id;
+        const data = {
+          gameId: '33214',
+          title: 'Testing the update command'
+        };
+        await apiClient.helix.channels.updateChannelInfo(id, data);
+        chatClient.say(channel, `Status update: ${data.title} (Game: ${data.gameId})`);
+      } catch (e) {
+        chatClient.logger.error(e);
+        chatClient.say(channel, "Error updating game.");
+      }
+    } else if (message === '!test') {
+      const t = await apiClient.getTokenInfo();
+      console.log(t.scopes);
+    }
+  });
 // End top-level async/await function.
 };
 
