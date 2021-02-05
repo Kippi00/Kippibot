@@ -1,3 +1,7 @@
+// This bot was made with the assistance of Guidebot as a template, thank you to everyone
+// who helped contribute to it. You can find it over at: https://github.com/AnIdiotsGuide/guidebot
+// 
+//
 // This will check if the node version you are running is the required
 // Node version, if it isn't it will throw the following error to inform
 // you.
