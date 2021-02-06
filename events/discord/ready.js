@@ -1,10 +1,10 @@
-module.exports = async client => {
+module.exports = async discordClient => {
   // Log that the bot is online.
-  client.logger.log(`${client.user.tag}, ready to serve ${client.users.cache.size} users in ${client.guilds.cache.size} servers.`, "ready");
+  discordClient.logger.log(`${discordClient.user.tag}, ready to serve ${discordClient.users.cache.size} users in ${discordClient.guilds.cache.size} servers.`, "ready");
 
   // If default settings do not exist in Enmap yetpm, create them.
-  await client.getSettings();
+  await discordClient.getSettings();
 
   // Make the bot "play the game" which is the help command with default prefix.
-  client.user.setActivity(`${client.settings.get("default").prefix}help`, {type: "PLAYING"});
+  discordClient.user.setActivity(`${discordClient.settings.get("default").prefix}help`, {type: "PLAYING"});
 };

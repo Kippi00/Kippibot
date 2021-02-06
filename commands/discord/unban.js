@@ -1,16 +1,16 @@
-exports.run = async(client, message, args, level) => { // eslint-disable-line no-unused-vars
+exports.run = async (discordClient, message, args, level) => { // eslint-disable-line no-unused-vars
   const id = args[0];
   if (!id) {
-    message.react('❔');
+    message.react("❔");
   }
   try {
     await message.guild.members.unban(id);
   } catch (e) {
-    message.react('❌');
+    message.react("❌");
     return message.channel.send(`Failed to unban user by the ID **${id}**. Reason: ${e}`);
   } 
 
-  message.react('✔');
+  message.react("✔");
   return message.channel.send(`Successfully unbanned user by the ID **${id}**`);
 };
   

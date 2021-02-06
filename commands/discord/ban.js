@@ -1,7 +1,7 @@
-exports.run = async(client, message, args, level) => { // eslint-disable-line no-unused-vars
-  const user = client.getUserFromMention(args[0]);
+exports.run = async (discordClient, message, args, level) => { // eslint-disable-line no-unused-vars
+  const user = discordClient.getUserFromMention(args[0]);
   if (!user) {
-    message.react('❔');
+    message.react("❔");
     return message.reply("Inavlid user specified, please mention a user to ban.");
   }
   const member = message.guild.members.cache.find(m => m.id === user.id).catch(console.error);
@@ -12,11 +12,11 @@ exports.run = async(client, message, args, level) => { // eslint-disable-line no
   try {
     await member.ban(reason);
   } catch (e) {
-    message.react('❌');
+    message.react("❌");
     return message.channel.send(`Failed to ban user **${member.user.tag}**. Reason: ${e}`);
   } 
 
-  message.react('✔');
+  message.react("✔");
   if (reason)
     return message.channel.send(`Successfully banned **${member.user.tag}** with reason: ${reason}`);
   else 

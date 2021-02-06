@@ -22,7 +22,7 @@ const responses = [
   "I'm watching Game of Thrones right now, go away."
 ];
 
-exports.run = (client, message, args) => {
+exports.run = (discordClient, message, args) => {
   if (!args[0])
     message.reply("I cannot predict a blank fortune.");
   else

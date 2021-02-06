@@ -1,11 +1,11 @@
 const { MessageEmbed } = require("discord.js");
 
-exports.run = async(client, message, args, level) => { // eslint-disable-line no-unused-vars
-  const target = await client.getUserFromMention(args[0]);
+exports.run = async (discordClient, message, args, level) => { // eslint-disable-line no-unused-vars
+  const target = await discordClient.getUserFromMention(args[0]);
   if (!target) {
     const key =  `${message.guild.id}-${message.author.id}`;
-    const currentLevel = client.userProfiles.get(key, "level");
-    const currentXp = client.userProfiles.get(key, "xp");
+    const currentLevel = discordClient.userProfiles.get(key, "level");
+    const currentXp = discordClient.userProfiles.get(key, "xp");
     const nextLevelXp = Math.pow(10 * (currentLevel + 1), 2) - currentXp;
     const nickname = (message.member.nickname) ? message.member.nickname : message.author.username;
   
@@ -25,11 +25,11 @@ exports.run = async(client, message, args, level) => { // eslint-disable-line no
     const key =  `${message.guild.id}-${target.id}`;
 
     //To account for users that may have not been registered yet.
-    if (!client.userProfiles.get(key))
-      return message.react('❌');
+    if (!discordClient.userProfiles.get(key))
+      return message.react("❌");
 
-    const currentLevel = client.userProfiles.get(key, "level");
-    const currentXp = client.userProfiles.get(key, "xp");
+    const currentLevel = discordClient.userProfiles.get(key, "level");
+    const currentXp = discordClient.userProfiles.get(key, "xp");
     const nextLevelXp = Math.pow(10 * (currentLevel + 1), 2) - currentXp;
     const member = await message.guild.members.cache.get(target.id);
     const nickname = (member.nickname) ? member.nickname : target.username;

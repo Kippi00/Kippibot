@@ -1,4 +1,6 @@
-module.exports = (client) => {
+module.exports = (discordClient, twitchClient) => {
+
+  // Remember, discordClient is Discord, twitchClient is twitch.
 
   /*
   PERMISSION LEVEL FUNCTION
@@ -9,10 +11,10 @@ module.exports = (client) => {
   command including the VERY DANGEROUS `eval` and `exec` commands!
 
   */
-  client.permlevel = message => {
+  discordClient.permlevel = message => {
     let permlvl = 0;
 
-    const permOrder = client.config.permLevels.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
+    const permOrder = discordClient.config.permLevels.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
 
     while (permOrder.length) {
       const currentLevel = permOrder.shift();
@@ -51,15 +53,15 @@ module.exports = (client) => {
     "levelUpMessage": "**{{nick}}** has leveled up to level {{level}}!"
   };
 
-  // getSettings merges the client defaults with the guild settings. guild settings in
+  // getSettings merges the discordClient defaults with the guild settings. guild settings in
   // enmap should only have *unique* overrides that are different from defaults.
-  client.getSettings = (guild) => {
-    client.settings.ensure("default", defaultSettings);
-    if(!guild) return client.settings.get("default");
-    const guildConf = client.settings.get(guild.id) || {};
+  discordClient.getSettings = (guild) => {
+    discordClient.settings.ensure("default", defaultSettings);
+    if(!guild) return discordClient.settings.get("default");
+    const guildConf = discordClient.settings.get(guild.id) || {};
     // This "..." thing is the "Spread Operator". It's awesome!
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
-    return ({...client.settings.get("default"), ...guildConf});
+    return ({...discordClient.settings.get("default"), ...guildConf});
   };
 
   /*
@@ -70,11 +72,11 @@ module.exports = (client) => {
 
   USAGE
 
-  const response = await client.awaitReply(msg, "Favourite Color?");
+  const response = await discordClient.awaitReply(msg, "Favourite Color?");
   msg.reply(`Oh, I really love ${response} too!`);
 
   */
-  client.awaitReply = async (msg, question, limit = 60000) => {
+  discordClient.awaitReply = async (msg, question, limit = 60000) => {
     const filter = m => m.author.id === msg.author.id;
     await msg.channel.send(question);
     try {
@@ -85,7 +87,7 @@ module.exports = (client) => {
     }
   };
 
-  client.getUserFromMention = (mention) => {
+  discordClient.getUserFromMention = (mention) => {
     if (!mention) return;
 
     if (mention.startsWith("<@") && mention.endsWith(">")) {
@@ -95,7 +97,7 @@ module.exports = (client) => {
         mention = mention.slice(1);
       }
 
-      return client.users.cache.get(mention);
+      return discordClient.users.cache.get(mention);
     }
   }
 
@@ -108,7 +110,7 @@ module.exports = (client) => {
   and stringifies objects!
   This is mostly only used by the Eval and Exec commands.
   */
-  client.clean = async (client, text) => {
+  discordClient.clean = async (discordClient, text) => {
     if (text && text.constructor.name == "Promise")
       text = await text;
     if (typeof text !== "string")
@@ -117,42 +119,58 @@ module.exports = (client) => {
     text = text
       .replace(/`/g, "`" + String.fromCharCode(8203))
       .replace(/@/g, "@" + String.fromCharCode(8203))
-      .replace(client.token, "mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0");
+      .replace(discordClient.token, "mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0");
 
     return text;
   };
 
-  client.loadCommand = (commandName, type) => {
+  discordClient.loadCommand = (commandName) => {
     let props;
     try {
-      if (type === 'discord') {
-        client.logger.log(`Loading Discord Command: ${commandName}`);
+        discordClient.logger.log(`Loading Discord Command: ${commandName}`);
         props = require(`../commands/discord/${commandName}`);
         if (props.init) {
-          props.init(client);
+          props.init(discordClient);
         }
-        client.discordCommands.set(props.help.name, props);
+        discordClient.commands.set(props.help.name, props);
         props.conf.aliases.forEach(alias => {
-          client.discordAliases.set(alias, props.help.name);
+          discordClient.aliases.set(alias, props.help.name);
         });
         return false;
-      }
     } catch (e) {
       return `Unable to load command ${commandName}: ${e}`;
     }
   };
 
-  client.unloadCommand = async (commandName, type) => {
+  twitchClient.loadCommand = (commandName) => {
+    let props;
+    try {
+        twitchClient.logger.log(`Loading Twitch Command: ${commandName}`);
+        props = require(`../commands/twitch/${commandName}`);
+        if (props.init) {
+          props.init(twitchClient);
+        }
+        twitchClient.commands.set(props.help.name, props);
+        props.conf.aliases.forEach(alias => {
+          twitchClient.aliases.set(alias, props.help.name);
+        });
+        return false;
+    } catch (e) {
+      return `Unable to load command ${commandName}: ${e}`;
+    }
+  };
+
+  discordClient.unloadCommand = async (commandName) => {
     let command;
-    if (client.discordCommands.has(commandName)) {
-      command = client.discordCommands.get(commandName);
-    } else if (client.discordAliases.has(commandName)) {
-      command = client.discordCommands.get(client.aliases.get(commandName));
+    if (discordClient.commands.has(commandName)) {
+      command = discordClient.commands.get(commandName);
+    } else if (discordClient.aliases.has(commandName)) {
+      command = discordClient.commands.get(discordClient.aliases.get(commandName));
     }
     if (!command) return `The command \`${commandName}\` doesn"t seem to exist, nor is it an alias. Try again!`;
     
     if (command.shutdown) {
-      await command.shutdown(client);
+      await command.shutdown(discordClient);
     }
     const mod = require.cache[require.resolve(`../commands/discord/${command.help.name}`)];
     delete require.cache[require.resolve(`../commands/discord/${command.help.name}.js`)];
@@ -188,13 +206,13 @@ module.exports = (client) => {
     }
   });
 
-  // `await client.wait(1000);` to "pause" for 1 second.
-  client.wait = require("util").promisify(setTimeout);
+  // `await discordClient.wait(1000);` to "pause" for 1 second.
+  discordClient.wait = require("util").promisify(setTimeout);
 
   // These 2 process methods will catch exceptions and give *more details* about the error and stack trace.
   process.on("uncaughtException", (err) => {
     const errorMsg = err.stack.replace(new RegExp(`${__dirname}/`, "g"), "./");
-    client.logger.error(`Uncaught Exception: ${errorMsg}`);
+    discordClient.logger.error(`Uncaught Exception: ${errorMsg}`);
     console.error(err);
     // Always best practice to let the code crash on uncaught exceptions. 
     // Because you should be catching them anyway.
@@ -202,7 +220,7 @@ module.exports = (client) => {
   });
 
   process.on("unhandledRejection", err => {
-    client.logger.error(`Unhandled rejection: ${err}`);
+    discordClient.logger.error(`Unhandled rejection: ${err}`);
     console.error(err);
   });
 };
