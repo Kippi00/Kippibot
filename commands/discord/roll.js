@@ -1,7 +1,7 @@
 exports.run = async (client, message, args, level) => { // eslint-disable-line no-unused-vars
   if (args.length < 2) return message.reply("Insufficient parameters.");
   
-  const dice = (args[0].startsWith("d")) ? args[0].slice(1) : args[0];
+  const dice = (args[0].toLowerCase().startsWith("d")) ? args[0].slice(1) : args[0];
   const rolls = args[1];
   
   if (!parseInt(dice, 10) || !parseInt(rolls, 10)) return message.react("❌");
