@@ -9,8 +9,6 @@ if (Number(process.version.slice(1).split(".")[0]) < 12) throw new Error("Node 1
 
 // Load up the discord.js library
 const Discord = require("discord.js");
-// Load up thw Twitch-JS library
-const Twitch = require("twitch-js");
 // We also load the rest of the things we need in this file:
 const { promisify } = require("util");
 const readdir = promisify(require("fs").readdir);
