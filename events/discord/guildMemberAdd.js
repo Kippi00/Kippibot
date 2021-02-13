@@ -1,8 +1,8 @@
 // This event executes when a new member joins a server. Let's welcome them!
 
-module.exports = (discordClient, member) => {
+module.exports = (bot, member) => {
   // Load the guild's settings
-  const settings = discordClient.getSettings(member.guild);
+  const settings = bot.getSettings(member.guild);
 
   // If welcome is off, don't proceed (don't welcome the user)
   if (settings.welcomeEnabled !== "true") return;

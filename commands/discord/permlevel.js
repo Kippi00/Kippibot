@@ -1,5 +1,5 @@
-exports.run = async (discordClient, message, args, level) => {
-  const friendly = discordClient.config.permLevels.find(l => l.level === level).name;
+exports.run = async (client, message, args, level, bot) => {
+  const friendly = bot.config.permLevels.find(l => l.level === level).name;
   message.reply(`Your permission level is: ${level} - ${friendly}`);
 };
 

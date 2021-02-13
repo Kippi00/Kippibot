@@ -1,5 +1,5 @@
-exports.run = async (discordClient, message, args, level) => { // eslint-disable-line no-unused-vars
-  const user = discordClient.getUserFromMention(args[0]);
+exports.run = async (client, message, args, level, bot) => { // eslint-disable-line no-unused-vars
+  const user = bot.discord.getUserFromMention(args[0]);
   if (!user) {
     message.react("❔");
     return message.reply("Inavlid user specified, please mention a user to ban.");

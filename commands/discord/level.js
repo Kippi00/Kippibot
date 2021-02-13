@@ -1,12 +1,16 @@
 const { MessageEmbed } = require("discord.js");
 
-exports.run = async (discordClient, message, args, level) => { // eslint-disable-line no-unused-vars
-  const target = await discordClient.getUserFromMention(args[0]);
+exports.run = async (client, message, args, level, bot) => { // eslint-disable-line no-unused-vars
+  const discord = bot.discord;
+  const target = await discord.getUserFromMention(args[0]);
+
+  // If there is no mention, or it's invalid, get points from the user.
   if (!target) {
     const key =  `${message.guild.id}-${message.author.id}`;
-    const currentLevel = discordClient.userProfiles.get(key, "level");
-    const currentXp = discordClient.userProfiles.get(key, "xp");
-    const nextLevelXp = Math.pow(10 * (currentLevel + 1), 2) - currentXp;
+    const currentLevel = discord.userProfiles.get(key, "level");
+    const currentXp = discord.userProfiles.get(key, "xp");
+    const nextLevelXp = Math.pow(10 * (currentLevel + 1), 2);
+    const remainingXp = nextLevelXp - currentXp;
     const nickname = (message.member.nickname) ? message.member.nickname : message.author.username;
   
     const embed = new MessageEmbed()
@@ -15,7 +19,7 @@ exports.run = async (discordClient, message, args, level) => { // eslint-disable
       .setTitle(message.author.username)
       .addField("Level", currentLevel)
       .addField("XP", currentXp)
-      .addField("Next Level XP", nextLevelXp);
+      .addField("Next Level XP", remainingXp);
     
     message.channel.send(embed).catch(console.error);
   }
@@ -25,11 +29,11 @@ exports.run = async (discordClient, message, args, level) => { // eslint-disable
     const key =  `${message.guild.id}-${target.id}`;
 
     //To account for users that may have not been registered yet.
-    if (!discordClient.userProfiles.get(key))
+    if (!discord.userProfiles.get(key))
       return message.react("❌");
 
-    const currentLevel = discordClient.userProfiles.get(key, "level");
-    const currentXp = discordClient.userProfiles.get(key, "xp");
+    const currentLevel = discord.userProfiles.get(key, "level");
+    const currentXp = discord.userProfiles.get(key, "xp");
     const nextLevelXp = Math.pow(10 * (currentLevel + 1), 2) - currentXp;
     const member = await message.guild.members.cache.get(target.id);
     const nickname = (member.nickname) ? member.nickname : target.username;

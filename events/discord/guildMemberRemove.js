@@ -1,6 +1,6 @@
-module.exports = (discordClient, member) => {
+module.exports = (bot, member) => {
   // Load the guild's settings
-  const settings = discordClient.getSettings(member.guild);
+  const settings = bot.getSettings(member.guild);
 
   // If greeetings are off, don't proceed (don't say goodbye to the user)
   if (settings.welcomeEnabled !== "true") return;

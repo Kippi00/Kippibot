@@ -1,7 +1,7 @@
-exports.run = async (discordClient, message, args, level) => { // eslint-disable-line no-unused-vars
+exports.run = async (client, message, args, level, bot) => { // eslint-disable-line no-unused-vars
   await message.reply("Bot is restarting.");
-  await Promise.all(discordClient.commands.map(cmd =>
-    discordClient.unloadCommand(cmd)
+  await Promise.all(bot.disord.commands.map(cmd =>
+    bot.disord.unloadCommand(cmd)
   ));
   process.exit(0);
 };

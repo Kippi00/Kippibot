@@ -1,6 +1,7 @@
-module.exports = (discordClient, twitchClient) => {
+module.exports = (bot) => {
 
-  // Remember, discordClient is Discord, twitchClient is twitch.
+  const discordClient = bot.discord.client;
+  // bot.discord, bot.twitch
 
   /*
   PERMISSION LEVEL FUNCTION
@@ -11,10 +12,10 @@ module.exports = (discordClient, twitchClient) => {
   command including the VERY DANGEROUS `eval` and `exec` commands!
 
   */
-  discordClient.permlevel = message => {
+  bot.discord.permlevel = message => {
     let permlvl = 0;
 
-    const permOrder = discordClient.config.permLevels.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
+    const permOrder = bot.config.permLevels.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
 
     while (permOrder.length) {
       const currentLevel = permOrder.shift();
@@ -49,19 +50,22 @@ module.exports = (discordClient, twitchClient) => {
     "welcomeMessage": "Say hello to **{{user}}**, everyone! We all need a warm welcome sometimes :D",
     "welcomeEnabled": "false",
     "twitchDefaultAnnouncements": "streaming",
+    "twitchNotifMsg": "{{channel}} is now live at {{url}}",
+    "twitchMsgEmbed": true,
+    "twitchOfflineAction": "none", // accepts none, edit, and delete
     "leaveMessage": "Everyone bid farewell to **{{user}}**... we will miss you 😭",
     "levelUpMessage": "**{{nick}}** has leveled up to level {{level}}!"
   };
 
   // getSettings merges the discordClient defaults with the guild settings. guild settings in
   // enmap should only have *unique* overrides that are different from defaults.
-  discordClient.getSettings = (guild) => {
-    discordClient.settings.ensure("default", defaultSettings);
-    if(!guild) return discordClient.settings.get("default");
-    const guildConf = discordClient.settings.get(guild.id) || {};
+  bot.discord.getSettings = (guild) => {
+    bot.discord.settings.ensure("default", defaultSettings);
+    if (!guild) return bot.discord.settings.get("default");
+    const guildConf = bot.discord.settings.get(guild.id) || {};
     // This "..." thing is the "Spread Operator". It's awesome!
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
-    return ({...discordClient.settings.get("default"), ...guildConf});
+    return ({...bot.discord.settings.get("default"), ...guildConf});
   };
 
   /*
@@ -76,7 +80,7 @@ module.exports = (discordClient, twitchClient) => {
   msg.reply(`Oh, I really love ${response} too!`);
 
   */
-  discordClient.awaitReply = async (msg, question, limit = 60000) => {
+  bot.discord.awaitReply = async (msg, question, limit = 60000) => {
     const filter = m => m.author.id === msg.author.id;
     await msg.channel.send(question);
     try {
@@ -87,7 +91,7 @@ module.exports = (discordClient, twitchClient) => {
     }
   };
 
-  discordClient.getUserFromMention = (mention) => {
+  bot.discord.getUserFromMention = (mention) => {
     if (!mention) return;
 
     if (mention.startsWith("<@") && mention.endsWith(">")) {
@@ -110,7 +114,7 @@ module.exports = (discordClient, twitchClient) => {
   and stringifies objects!
   This is mostly only used by the Eval and Exec commands.
   */
-  discordClient.clean = async (discordClient, text) => {
+  bot.discord.clean = async (client, text) => {
     if (text && text.constructor.name == "Promise")
       text = await text;
     if (typeof text !== "string")
@@ -119,58 +123,58 @@ module.exports = (discordClient, twitchClient) => {
     text = text
       .replace(/`/g, "`" + String.fromCharCode(8203))
       .replace(/@/g, "@" + String.fromCharCode(8203))
-      .replace(discordClient.token, "mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0");
+      .replace(client.token, "mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0");
 
     return text;
   };
 
-  discordClient.loadCommand = (commandName) => {
+  bot.discord.loadCommand = (commandName) => {
     let props;
     try {
-        discordClient.logger.log(`Loading Discord Command: ${commandName}`);
-        props = require(`../commands/discord/${commandName}`);
-        if (props.init) {
-          props.init(discordClient);
-        }
-        discordClient.commands.set(props.help.name, props);
-        props.conf.aliases.forEach(alias => {
-          discordClient.aliases.set(alias, props.help.name);
-        });
-        return false;
+      bot.logger.log(`Loading Discord Command: ${commandName}`);
+      props = require(`../commands/discord/${commandName}`);
+      if (props.init) {
+        props.init(bot.discord.client);
+      }
+      bot.discord.commands.set(props.help.name, props);
+      props.conf.aliases.forEach(alias => {
+        bot.discord.aliases.set(alias, props.help.name);
+      });
+      return false;
     } catch (e) {
       return `Unable to load command ${commandName}: ${e}`;
     }
   };
 
-  twitchClient.loadCommand = (commandName) => {
+  bot.twitch.loadCommand = (commandName) => {
     let props;
     try {
-        twitchClient.logger.log(`Loading Twitch Command: ${commandName}`);
-        props = require(`../commands/twitch/${commandName}`);
-        if (props.init) {
-          props.init(twitchClient);
-        }
-        twitchClient.commands.set(props.help.name, props);
-        props.conf.aliases.forEach(alias => {
-          twitchClient.aliases.set(alias, props.help.name);
-        });
-        return false;
+      bot.logger.log(`Loading Twitch Command: ${commandName}`);
+      props = require(`../commands/twitch/${commandName}`);
+      if (props.init) {
+        props.init(bot.twitch);
+      }
+      bot.twitch.commands.set(props.help.name, props);
+      props.conf.aliases.forEach(alias => {
+        bot.twitch.aliases.set(alias, props.help.name);
+      });
+      return false;
     } catch (e) {
       return `Unable to load command ${commandName}: ${e}`;
     }
   };
 
-  discordClient.unloadCommand = async (commandName) => {
+  bot.discord.unloadCommand = async (commandName) => {
     let command;
-    if (discordClient.commands.has(commandName)) {
-      command = discordClient.commands.get(commandName);
-    } else if (discordClient.aliases.has(commandName)) {
-      command = discordClient.commands.get(discordClient.aliases.get(commandName));
+    if (bot.discord.commands.has(commandName)) {
+      command = bot.discord.commands.get(commandName);
+    } else if (bot.discord.aliases.has(commandName)) {
+      command = bot.discord.commands.get(discordClient.aliases.get(commandName));
     }
     if (!command) return `The command \`${commandName}\` doesn"t seem to exist, nor is it an alias. Try again!`;
     
     if (command.shutdown) {
-      await command.shutdown(discordClient);
+      await command.shutdown(bot.discord.client);
     }
     const mod = require.cache[require.resolve(`../commands/discord/${command.help.name}`)];
     delete require.cache[require.resolve(`../commands/discord/${command.help.name}.js`)];
@@ -207,12 +211,12 @@ module.exports = (discordClient, twitchClient) => {
   });
 
   // `await discordClient.wait(1000);` to "pause" for 1 second.
-  discordClient.wait = require("util").promisify(setTimeout);
+  bot.discord.wait = require("util").promisify(setTimeout);
 
   // These 2 process methods will catch exceptions and give *more details* about the error and stack trace.
   process.on("uncaughtException", (err) => {
     const errorMsg = err.stack.replace(new RegExp(`${__dirname}/`, "g"), "./");
-    discordClient.logger.error(`Uncaught Exception: ${errorMsg}`);
+    bot.logger.error(`Uncaught Exception: ${errorMsg}`);
     console.error(err);
     // Always best practice to let the code crash on uncaught exceptions. 
     // Because you should be catching them anyway.
@@ -220,7 +224,7 @@ module.exports = (discordClient, twitchClient) => {
   });
 
   process.on("unhandledRejection", err => {
-    discordClient.logger.error(`Unhandled rejection: ${err}`);
+    bot.logger.error(`Unhandled rejection: ${err}`);
     console.error(err);
   });
 };

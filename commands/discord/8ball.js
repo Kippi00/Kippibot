@@ -22,7 +22,7 @@ const responses = [
   "I'm watching Game of Thrones right now, go away."
 ];
 
-exports.run = (discordClient, message, args) => {
+exports.run = (client, message, args, level, bot) => { // eslint-disable-line no-unused-vars
   if (!args[0])
     message.reply("I cannot predict a blank fortune.");
   else

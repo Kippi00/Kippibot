@@ -6,11 +6,12 @@ a command, it is not shown to them. If a command name is given with the
 help command, its extended help is shown.
 */
 
-exports.run = (discordClient, message, args, level) => {
+exports.run = (client, message, args, level, bot) => {
   // If no specific command is called, show all filtered commands.
+  const discord = bot.discord;
   if (!args[0]) {
     // Filter all commands by which are available for the user's level, using the <Collection>.filter() method.
-    const myCommands = message.guild ? discordClient.commands.filter(cmd => discordClient.levelCache[cmd.conf.permLevel] <= level) : discordClient.commands.filter(cmd => discordClient.levelCache[cmd.conf.permLevel] <= level &&  cmd.conf.guildOnly !== true);
+    const myCommands = message.guild ? discord.commands.filter(cmd => discord.levelCache[cmd.conf.permLevel] <= level) : discord.commands.filter(cmd => discord.levelCache[cmd.conf.permLevel] <= level &&  cmd.conf.guildOnly !== true);
 
     // Here we have to get the command names only, and we use that array to get the longest name.
     // This make the help commands "aligned" in the output.
@@ -26,16 +27,16 @@ exports.run = (discordClient, message, args, level) => {
         output += `\u200b\n== ${cat} ==\n`;
         currentCategory = cat;
       }
-      output += `${message.settings.prefix}${c.help.name}${" ".repeat(longest - c.help.name.length)} :: ${c.help.description}\n`;
+      output += `${message.settings.prefix}${c.help.name}${" ".repeat(longest - c.help.name.length)} :: ${c.help.description.replace("{{prefix}}", message.settings.prefix)}\n`;
     });
     message.channel.send(output, {code: "asciidoc", split: { char: "\u200b" }});
   } else {
     // Show individual command's help.
     let command = args[0];
-    if (discordClient.commands.has(command)) {
-      command = discordClient.commands.get(command);
-      if (level < discordClient.levelCache[command.conf.permLevel]) return;
-      message.channel.send(`= ${command.help.name} = \n${command.help.description}\nusage:: ${command.help.usage}\naliases:: ${command.conf.aliases.join(", ")}\n= ${command.help.name} =`, {code:"asciidoc"});
+    if (discord.commands.has(command)) {
+      command = discord.commands.get(command);
+      if (level < discord.levelCache[command.conf.permLevel]) return;
+      message.channel.send(`= ${command.help.name} = \n${command.help.description.replace("{{prefix}}", message.settings.prefix)}\nusage:: ${message.settings.prefix}${command.help.usage}\naliases:: ${command.conf.aliases.join(", ")}\n= ${command.help.name} =`, {code:"asciidoc"});
     }
   }
 };

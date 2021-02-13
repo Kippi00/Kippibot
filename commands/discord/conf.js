@@ -8,11 +8,16 @@ change it for that guild. The `add` action adds a key to the configuration of ev
 your bot. The `del` action removes the key also from every guild, and loses its value forever.
 */
 
-exports.run = async (discordClient, message, [action, key, ...value], level) => { // eslint-disable-line no-unused-vars
-
+exports.run = async (client, message, [action, key, ...value], level, bot) => { // eslint-disable-line no-unused-vars
+  const discord = bot.discord;
   // Retrieve Default Values from the default settings in the bot.
-  const defaults = discordClient.settings.get("default");
-  
+  const defaults = discord.settings.get("default");
+
+  if (!key) return message.reply("Please specify a key to add, delete, edit, or get.");
+
+  // Leave the Twitch commands to their own conf command.
+  if (key.startsWith("twitch")) return message.reply(`This is a twitch configuration command. Please use ${message.settings.prefix}twitch conf to edit this.`);
+
   // Adding a new key adds it to every guild (it will be visible to all of them)
   if (action === "add") {
     if (!key) return message.reply("Please specify a key to add");
@@ -23,7 +28,7 @@ exports.run = async (discordClient, message, [action, key, ...value], level) => 
     defaults[key] = value.join(" ");
   
     // One the settings is modified, we write it back to the collection
-    discordClient.settings.set("default", defaults);
+    discord.settings.set("default", defaults);
     message.reply(`${key} successfully added with the value of ${value.join(" ")}`);
   } else
   
@@ -35,7 +40,7 @@ exports.run = async (discordClient, message, [action, key, ...value], level) => 
 
     defaults[key] = value.join(" ");
 
-    discordClient.settings.set("default", defaults);
+    discord.settings.set("default", defaults);
     message.reply(`${key} successfully edited to ${value.join(" ")}`);
   } else
   
@@ -46,20 +51,20 @@ exports.run = async (discordClient, message, [action, key, ...value], level) => 
     if (!defaults[key]) return message.reply("This key does not exist in the settings");
     
     // Throw the 'are you sure?' text at them.
-    const response = await discordClient.awaitReply(message, `Are you sure you want to permanently delete ${key} from all guilds? This **CANNOT** be undone.`);
+    const response = await discord.awaitReply(message, `Are you sure you want to permanently delete ${key} from all guilds? This **CANNOT** be undone.`);
 
     // If they respond with y or yes, continue.
     if (["y", "yes"].includes(response)) {
 
       // We delete the default `key` here.
       delete defaults[key];
-      discordClient.settings.set("default", defaults);
+      discord.settings.set("default", defaults);
       
       // then we loop on all the guilds and remove this key if it exists.
       // "if it exists" is done with the filter (if the key is present and it's not the default config!)
-      for (const [guildid, conf] of discordClient.settings.filter((setting, id) => setting[key] && id !== "default")) {
+      for (const [guildid, conf] of discord.settings.filter((setting, id) => setting[key] && id !== "default")) {
         delete conf[key];
-        discordClient.settings.set(guildid, conf);
+        discord.settings.set(guildid, conf);
       }
       
       message.reply(`${key} was successfully deleted.`);

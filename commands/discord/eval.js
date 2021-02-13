@@ -6,14 +6,14 @@
 
 // However it's, like, super ultra useful for troubleshooting and doing stuff
 // you don't want to put in a command.
-exports.run = async (discordClient, message, args, level) => { // eslint-disable-line no-unused-vars
+exports.run = async (client, message, args, level, bot) => { // eslint-disable-line no-unused-vars
   const code = args.join(" ");
   try {
     const evaled = eval(code);
-    const clean = await discordClient.clean(discordClient, evaled);
+    const clean = await bot.discord.clean(client, evaled);
     message.channel.send(`\`\`\`js\n${clean}\n\`\`\``);
   } catch (err) {
-    message.channel.send(`\`ERROR\` \`\`\`xl\n${await discordClient.clean(discordClient, err)}\n\`\`\``);
+    message.channel.send(`\`ERROR\` \`\`\`xl\n${await bot.discord.clean(client, err)}\n\`\`\``);
   }
 };
 

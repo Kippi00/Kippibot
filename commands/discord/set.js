@@ -10,13 +10,14 @@
 // const action = args[0]; const key = args[1]; const value = args.slice(2);
 // OR the same as:
 // const [action, key, ...value] = args;
-exports.run = async (discordClient, message, [action, key, ...value], level) => { // eslint-disable-line no-unused-vars
+exports.run = async (client, message, [action, key, ...value], level, bot) => { // eslint-disable-line no-unused-vars
 
   // Retrieve current guild settings (merged) and overrides only.
+  const discord = bot.discord;
   const settings = message.settings;
-  const defaults = discordClient.settings.get("default");
-  const overrides = discordClient.settings.get(message.guild.id);
-  if (!discordClient.settings.has(message.guild.id)) discordClient.settings.set(message.guild.id, {});
+  const defaults = discord.settings.get("default");
+  const overrides = discord.settings.get(message.guild.id);
+  if (!discord.settings.has(message.guild.id)) discord.settings.set(message.guild.id, {});
   
   // Edit an existing key value
   if (action === "edit") {
@@ -31,10 +32,10 @@ exports.run = async (discordClient, message, [action, key, ...value], level) => 
     if (joinedValue === settings[key]) return message.reply("This setting already has that value!");
     
     // If the guild does not have any overrides, initialize it.
-    if (!discordClient.settings.has(message.guild.id)) discordClient.settings.set(message.guild.id, {});
+    if (!discord.settings.has(message.guild.id)) discord.settings.set(message.guild.id, {});
 
     // Modify the guild overrides directly.
-    discordClient.settings.set(message.guild.id, joinedValue, key);
+    discord.settings.set(message.guild.id, joinedValue, key);
 
     // Confirm everything is fine!
     message.reply(`${key} successfully edited to ${joinedValue}`);
@@ -47,12 +48,12 @@ exports.run = async (discordClient, message, [action, key, ...value], level) => 
     if (!overrides[key]) return message.reply("This key does not have an override and is already using defaults.");
     
     // Good demonstration of the custom awaitReply method in `./modules/functions.js` !
-    const response = await discordClient.awaitReply(message, `Are you sure you want to reset ${key} to the default value?`);
+    const response = await discord.awaitReply(message, `Are you sure you want to reset ${key} to the default value?`);
 
     // If they respond with y or yes, continue.
     if (["y", "yes"].includes(response.toLowerCase())) {
       // We delete the `key` here.
-      discordClient.settings.delete(message.guild.id, key);
+      discord.settings.delete(message.guild.id, key);
       message.reply(`${key} was successfully reset to default.`);
     } else
     // If they respond with n or no, we inform them that the action has been cancelled.

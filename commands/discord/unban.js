@@ -1,4 +1,4 @@
-exports.run = async (discordClient, message, args, level) => { // eslint-disable-line no-unused-vars
+exports.run = async (client, message, args, level, bot) => { // eslint-disable-line no-unused-vars
   const id = args[0];
   if (!id) {
     message.react("❔");
