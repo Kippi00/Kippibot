@@ -2,3 +2,5 @@ node_modules/
 config.js
 .eslintrc.json
 data/
+index-old.js
+twitchtokens.js
