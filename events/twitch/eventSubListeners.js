@@ -19,7 +19,7 @@ module.exports = async (bot) => { // eslint-disable-line no-unused-vars
     for await (const subscription of eventClient.helix.eventSub.getSubscriptionsPaginated()) {
       if (subscription.condition.broadcaster_user_id === c.id && (subscription.type === "stream.online" || subscription.type === "stream.offline")) {
         exists = true;
-        return;
+        break;
       }
     }
 
@@ -41,6 +41,7 @@ module.exports = async (bot) => { // eslint-disable-line no-unused-vars
           title = stream.title;
           console.log(`${e.broadcasterDisplayName} went live!`);
           c.discords.forEach(async d => {
+            if (d.)
             const guild = d.guild;
             const chan = d.channel;
             const msg = d.msg;

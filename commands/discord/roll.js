@@ -1,16 +1,19 @@
 exports.run = async (client, message, args, level, bot) => { // eslint-disable-line no-unused-vars
-  if (args.length < 2) return message.reply("Insufficient parameters.");
+  //if (args.length < 1) return message.reply("Insufficient parameters.");
   
-  const dice = (args[0].toLowerCase().startsWith("d")) ? args[0].slice(1) : args[0];
-  const rolls = args[1];
-  
-  if (!parseInt(dice, 10) || !parseInt(rolls, 10)) return message.react("❌");
-  if (parseInt(rolls, 10) < 1) return message.reply("You need some amount of dice to roll dice, 4Head. You can't roll with 0 or negative dice");
-  if (parseInt(dice, 10) < 2) return message.reply("What kind of dice are you running here???");
+  const dice = (args[0].toLowerCase().startsWith("d")) ? parseInt(args[0].slice(1), 10) : parseInt(args[0], 10);
+  let rolls = parseInt(args[1], 10);
+
+  if (isNaN(dice)) return message.react("❌");
+  if (rolls < 1 || isNaN(rolls)) { 
+    rolls = 1;
+  }
+
+  if (dice < 2) return message.reply("What kind of dice are you running here???");
 
   const results = [];
 
-  for (let i = 1; i <= parseInt(rolls, 10); i++) {
+  for (let i = 1; i <= rolls; i++) {
     const rollResult = 1 + Math.floor(Math.random() * parseInt(dice, 10));
     results.push(rollResult);
   }
