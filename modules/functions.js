@@ -40,6 +40,7 @@ module.exports = (client) => {
   const defaultSettings = {
     "prefix": "~",
     "modLogChannel": "mod-log",
+    "modLog": "true",
     "modRole": "Moderator",
     "adminRole": "Administrator",
     "systemNotice": "true",
@@ -55,7 +56,7 @@ module.exports = (client) => {
   // enmap should only have *unique* overrides that are different from defaults.
   client.getSettings = (guild) => {
     client.settings.ensure("default", defaultSettings);
-    if(!guild) return client.settings.get("default");
+    if (!guild) return client.settings.get("default");
     const guildConf = client.settings.get(guild.id) || {};
     // This "..." thing is the "Spread Operator". It's awesome!
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
@@ -97,7 +98,7 @@ module.exports = (client) => {
 
       return client.users.cache.get(mention);
     }
-  }
+  };
 
 
   /*
@@ -125,7 +126,7 @@ module.exports = (client) => {
   client.loadCommand = (commandName, type) => {
     let props;
     try {
-      if (type === 'discord') {
+      if (type === "discord") {
         client.logger.log(`Loading Discord Command: ${commandName}`);
         props = require(`../commands/discord/${commandName}`);
         if (props.init) {
@@ -142,6 +143,7 @@ module.exports = (client) => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   client.unloadCommand = async (commandName, type) => {
     let command;
     if (client.discordCommands.has(commandName)) {
