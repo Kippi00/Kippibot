@@ -36,7 +36,7 @@ module.exports = async (client, message) => {
     if (!content) content = "[Unknown Message]";
     const timestamp = `[${moment().format("YYYY-MM-DD HH:mm:ss")}]:`;
     const embed = new MessageEmbed()
-      .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }))
+      .setAuthor(user.username, user.displayAvatarURL({ dynamic: true }))
       .setColor(0xFF0000)
       .setTitle("Type: Message Delete")
       .setDescription(`Message from ${message.author.tag} in ${message.channel} deleted`)

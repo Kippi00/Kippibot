@@ -38,7 +38,7 @@ module.exports = async (client, member) => {
     const embed = new MessageEmbed()
       .setAuthor(`${executor || "Unknown Executor"}`)
       .setColor(0xFFA500)
-      .setTitle("Kick")
+      .setTitle("Type: Kick")
       .setDescription(`Member ${member.user.tag} has been kicked from ${member.guild.name}`)
       .setTimestamp(timestamp);
 

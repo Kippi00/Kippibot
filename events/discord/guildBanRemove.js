@@ -26,7 +26,7 @@ module.exports = async (client, guild, user) => {
     const embed = new MessageEmbed()
       .setAuthor(`${executor || "Unknown Executor"}`)
       .setColor(0x00FF00)
-      .setTitle("Unban")
+      .setTitle("Type: Unban")
       .setDescription(`Member ${user.tag} has been unbanned from ${guild.name}`)
       .setTimestamp(timestamp);
 
