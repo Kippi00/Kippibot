@@ -16,15 +16,15 @@ module.exports = async (client, guild, user) => {
     let executor = "";
     let reason = "";
     const logs = await guild.fetchAuditLogs({ type: 22}).catch(console.error);
-    const banLog = await logs.entries.find(l => (l.target.username === user.username 
+    const entry = await logs.entries.find(l => (l.target.username === user.username 
       && l.createdTimestamp > (Date.now() - 5000)));
 
-    if (banLog) {
-      executor = banLog.executor.username;
-      reason = banLog.reason;
+    if (entry) {
+      executor = entry.executor.username;
+      reason = entry.reason;
     }
 
-    const timestamp = `[${moment().format("YYYY-MM-DD HH:mm:ss")}]:`;
+    const timestamp = moment().format("YYYY-MM-DD HH:mm:ss");
     const embed = new MessageEmbed()
       .setAuthor(`${executor || "Unknown Executor"}`)
       .setColor(0xFF0000)

@@ -34,7 +34,7 @@ module.exports = async (client, message) => {
 
     let content = message.cleanContent;
     if (!content) content = "[Unknown Message]";
-    const timestamp = `[${moment().format("YYYY-MM-DD HH:mm:ss")}]:`;
+    const timestamp = moment().format("YYYY-MM-DD HH:mm:ss");
     const embed = new MessageEmbed()
       .setAuthor(user.username, user.displayAvatarURL({ dynamic: true }))
       .setColor(0xFF0000)

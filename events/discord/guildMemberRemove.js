@@ -26,24 +26,33 @@ module.exports = async (client, member) => {
     let executor = "";
     let reason = "";
     const logs = await member.guild.fetchAuditLogs({ type: 20}).catch(console.error);
-    const banLog = await logs.entries.find(l => (l.target.username === member.user.username 
+    const entry = await logs.entries.find(l => (l.target.username === member.user.username 
       && l.createdTimestamp > (Date.now() - 5000)));
+    const timestamp = moment().format("YYYY-MM-DD HH:mm:ss");
 
-    if (banLog) {
-      executor = banLog.executor.username;
-      reason = banLog.reason;
+    if (entry) {
+      executor = entry.executor.username;
+      reason = entry.reason;
+      const embed = new MessageEmbed()
+        .setAuthor(`${executor || "Unknown Executor"}`)
+        .setColor(0xFFA500)
+        .setTitle("Type: Kick")
+        .setDescription(`Member ${member.user.tag} has been kicked from ${member.guild.name}`)
+        .setTimestamp(timestamp);
+  
+      embed.addField("Reason", `${reason || "No Reason"}`);
+  
+      ch.send(embed).catch(console.error);
     }
-
-    const timestamp = `[${moment().format("YYYY-MM-DD HH:mm:ss")}]:`;
-    const embed = new MessageEmbed()
-      .setAuthor(`${executor || "Unknown Executor"}`)
-      .setColor(0xFFA500)
-      .setTitle("Type: Kick")
-      .setDescription(`Member ${member.user.tag} has been kicked from ${member.guild.name}`)
-      .setTimestamp(timestamp);
-
-    embed.addField("Reason", `${reason || "No Reason"}`);
-
-    ch.send(embed).catch(console.error);
+    else {
+      const embed = new MessageEmbed()
+        .setAuthor(member.user.username)
+        .setColor(0xFFFF00)
+        .setTitle("Type: Leave")
+        .setDescription(`Member ${member.user.tag} has left ${member.guild.name}`)
+        .setTimestamp(timestamp);
+  
+      ch.send(embed).catch(console.error);
+    }
   }
 };
