@@ -24,7 +24,7 @@ module.exports = async (client, member) => {
   if (ch) {
     const timestamp = moment().format("YYYY-MM-DD HH:mm:ss");
     const embed = new MessageEmbed()
-      .setAuthor(member.user.useername)
+      .setAuthor(member.user.username)
       .setColor(0x00FFFF)
       .setTitle("Type: Join")
       .setDescription(`Member ${member.user.tag} joined ${member.guild.name}`)
