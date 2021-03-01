@@ -182,7 +182,7 @@ exports.run = async (client, message, args, level) => { // eslint-disable-line n
         const embedResults = new MessageEmbed()
           .setAuthor(message.author.username, message.author.displayAvatarURL({ dynamic: true}))
           .setTitle(`The poll "${question}" has ended!`);
-        if (reason) {
+        if (reason === "Stopped by author.") {
           embedResults.setFooter("Ended forcibly.");
           embedResults.setTimestamp(moment());
         } else {
