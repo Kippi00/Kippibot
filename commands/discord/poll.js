@@ -154,7 +154,7 @@ exports.run = async (client, message, args, level) => { // eslint-disable-line n
           });
   
           // We can assume that arr will only have 1 element, because we can't have duplicate emoji reactions.
-          arr[0].votes = reaction.count - 1; // subtract 1 to exclude the bot.
+          arr[0].votes = reaction.count - 1; // subtract 1 to exclude the bot's reaction.
           results.push(arr[0]);
           resultsStr += `${arr[0].reaction}: ${arr[0].option} - ${arr[0].votes} votes\n`;
         });
