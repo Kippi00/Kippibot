@@ -2,30 +2,30 @@ const { MessageEmbed } = require("discord.js");
 
 exports.run = async (client, message, args, level) => { // eslint-disable-line no-unused-vars
   const guild = message.guild;
+  // Load the leaderboard.
+  const filter = client.userProfiles.filter(m => m.guild === message.guild.id);
+  const xpArr = filter.map(m => {
+    const obj = {
+      user: m.user,
+      level: m.level,
+      xp: m.xp
+    };
+    return obj;
+  });
+
+
+  xpArr.sort((a, b) => b.xp - a.xp);
+
   switch (message.flags[0]) {
     case "leaderboard":
     case "l": {
       // Get top 10 users
-      const filter = client.userProfiles.filter(m => m.guild === message.guild.id);
-      const xpArr = filter.map(m => {
-        const obj = {
-          user: m.user,
-          level: m.level,
-          xp: m.xp
-        };
-        return obj;
-      });
-
-
-      xpArr.sort((a, b) => b.xp - a.xp);
-
-      const top10 = xpArr.slice(0, 9);
+      const top10 = xpArr.slice(0, 10);
 
       let description = "";
 
       for (let i = 0; i < top10.length; i++) {
         const member = await guild.members.cache.get(top10[i].user);
-        console.log(member.nickname || member.user.username);
         const rank = i + 1;
         description += `**${rank}. ${member.nickname || member.user.username}**- LV: ${top10[i].level} - XP: ${top10[i].xp}\n`;
       }
@@ -45,14 +45,21 @@ exports.run = async (client, message, args, level) => { // eslint-disable-line n
         const currentXp = client.userProfiles.get(key, "xp");
         const nextLevelXp = Math.pow(10 * (currentLevel + 1), 2) - currentXp;
         const nickname = (message.member.nickname) ? message.member.nickname : message.author.username;
+        const userObj = xpArr.find(e => e.user === message.author.id);
+        const rank = 1 + xpArr.indexOf(userObj);
+
+        console.log(rank);
+
   
         const embed = new MessageEmbed()
           .setThumbnail(message.author.avatarURL())
           .setAuthor(nickname, message.author.avatarURL())
           .setTitle(message.author.username)
-          .addField("Level", currentLevel)
-          .addField("XP", currentXp)
-          .addField("Next Level XP", nextLevelXp);
+          .addField("Level", currentLevel, true)
+          .addField("Rank", rank, true)
+          .addField("\u200b", "\u200b", true)
+          .addField("Experience", currentXp, true)
+          .addField("Next Level", nextLevelXp, true);
     
         message.channel.send(embed).catch(console.error);
       }
@@ -70,14 +77,20 @@ exports.run = async (client, message, args, level) => { // eslint-disable-line n
         const nextLevelXp = Math.pow(10 * (currentLevel + 1), 2) - currentXp;
         const member = await message.guild.members.cache.get(target.id);
         const nickname = (member.nickname) ? member.nickname : target.username;
+        const userObj = xpArr.find(e => e.user === member.id);
+        const rank = 1 + xpArr.indexOf(userObj);
+
+        console.log(rank);
   
         const embed = new MessageEmbed()
           .setThumbnail(target.avatarURL())
           .setAuthor(nickname, target.avatarURL())
           .setTitle(target.username)
-          .addField("Level", currentLevel)
-          .addField("XP", currentXp)
-          .addField("Next Level XP", nextLevelXp);
+          .addField("Level", currentLevel, true)
+          .addField("Rank", rank, true)
+          .addField("\u200b", "\u200b", true)
+          .addField("Experience", currentXp, true)
+          .addField("Next Level", nextLevelXp, true);
     
         message.channel.send(embed).catch(console.error);
       }
