@@ -34,7 +34,7 @@ module.exports = async (client, message) => {
     // Add user to recent chatters, then remove them after 2.5 seconds.
     client.recentChatters.add(message.author.id);
     setTimeout(() => {
-      client.recentChatters.delete(message.author.id)
+      client.recentChatters.delete(message.author.id);
     }, 2500);
     const key = `${message.guild.id}-${message.author.id}`;
     client.userProfiles.ensure(key, {
@@ -52,11 +52,10 @@ module.exports = async (client, message) => {
     // Calculate the user's current level, and adjust if needed.
     const currentLevel = Math.floor(0.1 * Math.sqrt(client.userProfiles.get(key, "xp")));
     if (currentLevel > client.userProfiles.get(key, "level")) {
-      const settings = client.getSettings(message.member.guild);
       const nickname = (message.member.nickname) ? message.member.nickname : message.author.username;
       client.userProfiles.inc(key, "level");
       // Send the level up message in the channel of the user's last message.
-      const levelUpMessage = settings.levelUpMessage.replace("{{user}}", message.author.username).replace("{{level}}", currentLevel).replace("{{nick}}", nickname);
+      const levelUpMessage = message.settings.levelUpMessage.replace("{{user}}", message.author.username).replace("{{level}}", currentLevel).replace("{{nick}}", nickname);
       message.channel.send(levelUpMessage);
     }
 
