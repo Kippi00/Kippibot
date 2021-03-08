@@ -10,7 +10,11 @@
     "inquirer": "^7.3.3",
     "moment": "^2.29.1",
     "moment-duration-format": "^2.3.2",
-    "twitch-js": "^2.0.0-beta.42"
+    "pokemon-assets": "^0.6.0",
+    "twitch": "^4.4.12",
+    "twitch-auth": "^4.4.12",
+    "twitch-eventsub": "^4.4.12",
+    "twitch-eventsub-ngrok": "^4.4.12"
   },
   "engines": {
     "node": ">=12"

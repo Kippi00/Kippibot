@@ -15,6 +15,11 @@ const readdir = promisify(require("fs").readdir);
 const Enmap = require("enmap");
 const config = require("./config.js");
 
+// Load up the required twitch scripts
+//const { ApiClient, ClientCredentialsAuthProvider } = require("twitch");
+//const { EventSubListener } = require("twitch-eventsub");
+//const { NgrokAdapter } = require("twitch-eventsub-ngrok");
+
 // This is your client. Some people call it `bot`, some people call it `self`,
 // some might call it `cootchie`. Either way, when you see `client.something`,
 // or `bot.something`, this is what we're referring to. Your client.
@@ -48,6 +53,15 @@ client.discordAliases = new Enmap();
 // and makes things extremely easy for this purpose.
 client.settings = new Enmap({name: "settings"});
 client.userProfiles = new Enmap({name: "userProfiles"});
+client.twitchChannels = new Enmap({name: "twitchChannels"});
+
+const clientID = config.twitch.bot.clientID;
+const clientSecret = config.twitch.bot.clientSecret;
+
+//const authProvider = new ClientCredentialsAuthProvider(clientID, clientSecret);
+//client.twitchEvent = new ApiClient({ authProvider});
+// Local testing
+//client.eventListener = new EventSubListener(client.twitchEvent, new NgrokAdapter());
 
 // Used for command cooldowns and in XP system.
 client.recentChatters = new Set();
@@ -80,12 +94,19 @@ const init = async () => {
     client.on(eventName, event.bind(null, client));
   });
 
+  require("./modules/pokemon-data/pokemonFunctions.js")(client);
+
   // Generate a cache of client permissions for pretty perm names in commands.
   client.levelCache = {};
   for (let i = 0; i < client.config.permLevels.length; i++) {
     const thisLevel = client.config.permLevels[i];
     client.levelCache[thisLevel.name] = thisLevel.level;
   }
+
+  //await client.twitchEvent.helix.eventSub.deleteAllSubscriptions();
+  //await client.eventListener.listen();
+
+  //require("./modules/eventListener")(client);
 
   // Here we login the client.
   client.login(client.config.discordToken);

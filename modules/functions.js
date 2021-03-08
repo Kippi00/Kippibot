@@ -48,6 +48,7 @@ module.exports = (client) => {
     "welcomeMessage": "Say hello to **{{user}}**, everyone! We all need a warm welcome sometimes :D",
     "welcomeEnabled": "false",
     "twitchDefaultAnnouncements": "streaming",
+    "twitchDefaultMsg": "{{channel}} has gone live with {{game}} at {{url}}!",
     "leaveMessage": "Everyone bid farewell to **{{user}}**... we will miss you 😭",
     "levelUpMessage": "**{{nick}}** has leveled up to level {{level}}!"
   };

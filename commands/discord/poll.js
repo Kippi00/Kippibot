@@ -47,7 +47,7 @@ exports.run = async (client, message, args, level) => { // eslint-disable-line n
       if (!channel.permissionsFor(message.guild.me).has(["SEND_MESSAGES", "VIEW_CHANNEL"])) 
         return message.reply("I am unable to view or send messages to that channel. Please ensure that I have both permissions.");
       if (!channel.permissionsFor(message.guild.me).has(["ADD_REACTIONS", "MANAGE_MESSAGES"])) 
-        return message.reply("I am missing the ability to add or remove reactions. Please check that I have both the Add Reactions and Manage Messages permissions.")
+        return message.reply("I am missing the ability to add or remove reactions. Please check that I have both the Add Reactions and Manage Messages permissions.");
       
       const currentTime = moment();
       let duration;
