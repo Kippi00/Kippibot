@@ -55,8 +55,8 @@ client.settings = new Enmap({name: "settings"});
 client.userProfiles = new Enmap({name: "userProfiles"});
 client.twitchChannels = new Enmap({name: "twitchChannels"});
 
-const clientID = config.twitch.bot.clientID;
-const clientSecret = config.twitch.bot.clientSecret;
+//const clientID = config.twitch.bot.clientID;
+//const clientSecret = config.twitch.bot.clientSecret;
 
 //const authProvider = new ClientCredentialsAuthProvider(clientID, clientSecret);
 //client.twitchEvent = new ApiClient({ authProvider});
