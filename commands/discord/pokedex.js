@@ -152,8 +152,8 @@ exports.conf = {
 exports.help = {
   name: "pokedex",
   category: "Unknown",
-  description: "It's a command.",
-  usage: "pokedex [-pokemon|-item|-move]"
+  description: "Get info on pokemon and type matchups!",
+  usage: "Pokemon: pokedex [-pokemon] [pokemon]\nType Defense Profile: pokedex [-weak] [type1] [type2] - Only one type needs to be specified."
 };
 
 const typeColor = {
