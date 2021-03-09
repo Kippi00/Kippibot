@@ -1,3 +1,9 @@
+const { Message, Client, User } = require("discord.js");
+
+/**
+ * 
+ * @param {Client} client Discord client.
+ */
 module.exports = (client) => {
 
   /*
@@ -8,6 +14,12 @@ module.exports = (client) => {
   NEVER GIVE ANYONE BUT OWNER THE LEVEL 10! By default this can run any
   command including the VERY DANGEROUS `eval` and `exec` commands!
 
+  */
+
+  /**
+  * 
+  * @param {Message} message 
+  * @returns {number} Permission level.
   */
   client.permlevel = message => {
     let permlvl = 0;
@@ -76,6 +88,13 @@ module.exports = (client) => {
   msg.reply(`Oh, I really love ${response} too!`);
 
   */
+ /**
+  * 
+  * @param {Message} msg 
+  * @param {String} question 
+  * @param {number} limit 
+  * @returns {Promise<string>}
+  */
   client.awaitReply = async (msg, question, limit = 60000) => {
     const filter = m => m.author.id === msg.author.id;
     await msg.channel.send(question);
@@ -87,6 +106,11 @@ module.exports = (client) => {
     }
   };
 
+  /**
+   * 
+   * @param {*} mention 
+   * @returns {User}
+   */
   client.getUserFromMention = (mention) => {
     if (!mention) return;
 
@@ -109,6 +133,12 @@ module.exports = (client) => {
   escaped so they're shown more easily. As a bonus it resolves promises
   and stringifies objects!
   This is mostly only used by the Eval and Exec commands.
+  */
+ /**
+  * 
+  * @param {Client} client 
+  * @param {Promise<string>} text 
+  * @returns 
   */
   client.clean = async (client, text) => {
     if (text && text.constructor.name == "Promise")

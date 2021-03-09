@@ -1,0 +1,44 @@
+{
+  "defendingTypes": {
+    "bug": 1.0,
+    "dark": 2.0,
+    "dragon": 2.0,
+    "electric": 1.0,
+    "fairy": 1.0,
+    "fighting": 2.0,
+    "fire": 0.5,
+    "flying": 1.0,
+    "ghost": 1.0,
+    "grass": 1.0,
+    "ground": 1.0,
+    "ice": 1.0,
+    "normal": 1.0,
+    "poison": 0.5,
+    "psychic": 1.0,
+    "rock": 1.0,
+    "steel": 0.5,
+    "water": 1.0
+  },
+  "attackingTypes": {
+    "bug": 0.5,
+    "dark": 0.5,
+    "dragon": 0.0,
+    "electric": 1.0,
+    "fairy": 1.0,
+    "fighting": 0.5,
+    "fire": 1.0,
+    "flying": 1.0,
+    "ghost": 1.0,
+    "grass": 1.0,
+    "ground": 1.0,
+    "ice": 1.0,
+    "normal": 1.0,
+    "poison": 2.0,
+    "psychic": 1.0,
+    "rock": 1.0,
+    "steel": 2.0,
+    "water": 1.0
+  }
+}
+
+

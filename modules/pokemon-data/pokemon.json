@@ -11052,7 +11052,7 @@
     "num": 122,
     "name": "Mr. Mime",
     "alias": "mrmime",
-    "sprite": "mr-mime",
+    "sprite": "mrmime",
     "types": ["Psychic", "Fairy"],
     "genderRatio": {
       "M": 0,
@@ -11113,7 +11113,7 @@
     "num": 122,
     "name": "Galarian Mr. Mime",
     "alias": "mrmimegalar",
-    "sprite": "mr-mime-galar",
+    "sprite": "mrmime-galar",
     "types": ["Ice", "Psychic"],
     "genderRatio": {
       "M": 0,
@@ -20240,7 +20240,7 @@
     "num": 250,
     "name": "Ho-Oh",
     "alias": "hooh",
-    "sprite": "ho-oh",
+    "sprite": "hooh",
     "types": ["Fire", "Flying"],
     "genderRatio": {
       "M": 0,
@@ -60729,7 +60729,7 @@
     "num": 782,
     "name": "Jangmo-o",
     "alias": "jangmoo",
-    "sprite": "jangmo-o",
+    "sprite": "jangmoo",
     "types": ["Dragon"],
     "genderRatio": {
       "M": 0,
@@ -60790,7 +60790,7 @@
     "num": 783,
     "name": "Hakamo-o",
     "alias": "hakamoo",
-    "sprite": "hakamo-o",
+    "sprite": "hakamoo",
     "types": ["Dragon", "Fighting"],
     "genderRatio": {
       "M": 0,
@@ -60851,7 +60851,7 @@
     "num": 784,
     "name": "Kommo-o",
     "alias": "kommoo",
-    "sprite": "kommo-o",
+    "sprite": "kommoo",
     "types": ["Dragon", "Fighting"],
     "genderRatio": {
       "M": 0,
@@ -60912,7 +60912,7 @@
     "num": 784,
     "name": "Kommo-o-Totem",
     "alias": "kommoototem",
-    "sprite": "kommo-o",
+    "sprite": "kommo-o-totem",
     "types": ["Dragon", "Fighting"],
     "genderRatio": {
       "M": 0,
@@ -67366,7 +67366,7 @@
     "num": 866,
     "name": "Mr. Rime",
     "alias": "mrrime",
-    "sprite": "mr-rime",
+    "sprite": "mrrime",
     "types": ["Ice", "Psychic"],
     "genderRatio": {
       "M": 0,

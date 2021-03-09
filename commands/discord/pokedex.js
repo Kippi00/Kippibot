@@ -1,15 +1,13 @@
-const { MessageEmbed } = require("discord.js");
+const { MessageEmbed, Client, Message } = require("discord.js");
 
-
-const pokedexSearch = (client, type, param) => {
-  let result = null;
-  if (type === "pokemon") {
-    result = client.pokemonDb.find(p => p.name === param || p.alias === param || p.sprite === param);
-  }
-  return result;
-};
-
-exports.run = async (client, message, args, level) => { // eslint-disable-line no-unused-vars
+/**
+ * 
+ * @param {Client} client 
+ * @param {Message} message 
+ * @param {string []} args 
+ * @returns {Promise}
+ */
+exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
   switch (message.flags[0]) {
     default:
       message.channel.send(`= ${this.help.name} = \n${this.help.description}\nusage:: ${this.help.usage}\naliases:: ${this.conf.aliases.join(", ")}\n= ${this.help.name} =`, {code:"asciidoc"});
@@ -20,9 +18,8 @@ exports.run = async (client, message, args, level) => { // eslint-disable-line n
       break;
     case "pokemon": {
       if (args.length < 1) return;
-      const pokemon = pokedexSearch(client, "pokemon", args.join(" ").toProperCase());
+      const pokemon = client.pokedexSearch("pokemon", args.join(" ").toProperCase());
       if (!pokemon) return message.reply("Pokemon not found. Make sure it is spelled correctly.");
-
       const baseStats = pokemon.baseStats;
       let goStats = {};
       const abilities = Object.entries(pokemon.abilities);
@@ -32,8 +29,8 @@ exports.run = async (client, message, args, level) => { // eslint-disable-line n
       console.log(baseStats);
 
       types.forEach(t => {
-        const emoji = client.emojis.cache.find(e => e.name === `type${t.toLowerCase()}` && e.guild.id === '492830840309678091')
-        typeStr += `${emoji} ${t}\n`
+        const emoji = getTypeEmoji(client, t);
+        typeStr += `${emoji} ${t}\n`;
       });
 
       let pokemonGif = "";
@@ -45,7 +42,7 @@ exports.run = async (client, message, args, level) => { // eslint-disable-line n
       const embed = new MessageEmbed();
 
       if (message.flags[1] === "go") {
-        goStats = await convertToGoStats(client, baseStats, pokemon);
+        goStats = await client.convertToGoStats(baseStats, pokemon);
         if (!goStats) return message.channel.send("Couldn't get Pokemon Go Stats. Something went terribly wrong.");
         const goStatsStr = `**Attack**: ${goStats.attack}\n**Defense**: ${goStats.defense}\n**Stamina**: ${goStats.stamina}`;
         const maxCPStr = `**@L40**: ${goStats.lv40CP}\n**@L50**: ${goStats.lv50CP}`;
@@ -69,7 +66,6 @@ exports.run = async (client, message, args, level) => { // eslint-disable-line n
           }
         });
 
-        //message.channel.send(baseStatsStr);
 
         embed.setTitle(`#${pokemon.num} ${pokemon.name}`)
           .addField("Base Stats", baseStatsStr, true)
@@ -79,6 +75,68 @@ exports.run = async (client, message, args, level) => { // eslint-disable-line n
           .setImage(pokemonGif);
       }
       message.channel.send(embed).catch(console.error);
+      break;
+    }
+    case "weakness": 
+    case "weak": {
+      const types = args.slice(0, 2); // Only take the first two args.
+      const isGoRequest = message.flags[1] === "go";
+      const defenseProfile = client.getDefenseProfile(types, isGoRequest);
+      const doubleWeak = [];
+      const singleWeak = [];
+      const neutral = [];
+      const singleResist = [];
+      const doubleResist = [];
+      const tripleResist = []; // Go only
+      const immune = []; // MSG only
+
+      
+      defenseProfile.forEach(t => {
+        console.log(t);
+        const e = t.effectiveness;
+        if (e === 4 || e === Math.pow(8/5, 2)) doubleWeak.push(`${getTypeEmoji(client, t.type)}`);
+        else if (e === 2 || e === 8/5) singleWeak.push(`${getTypeEmoji(client, t.type)}`);
+        else if (e === 1/2 || e === 5/8) singleResist.push(`${getTypeEmoji(client, t.type)}`);
+        else if (e === 1/4 || e === 25/64) doubleResist.push(`${getTypeEmoji(client, t.type)}`);
+        else if (e === 125/512) tripleResist.push(`${getTypeEmoji(client, t.type)}`);
+        else if (e === 0) immune.push(`${getTypeEmoji(client, t.type)}`);
+        else neutral.push(`${getTypeEmoji(client, t.type)}`);
+      });
+
+      const embed = new MessageEmbed();
+      
+
+      let title = `Defense profile for **${types.join("/")}**`;
+      types.forEach(t => title += ` ${getTypeEmoji(client, t)}`);
+
+      // Go types = 8/5 - weak, 5/8 - res, 25/65 - double res 
+
+      embed.setTitle(title);
+      embed.setColor(typeColor[types[0].toLowerCase()]);
+
+      if (isGoRequest) {
+        if (doubleWeak.length > 0) embed.addField("Weaknesses (2.56x)", doubleWeak.join(" "));
+        if (singleWeak.length > 0) embed.addField("Weaknesses (1.6x)", singleWeak.join(" "));
+        if (neutral.length > 0) embed.addField("Neutral (1x)", neutral.join(" "));
+        if (singleResist.length > 0) embed.addField("Resistances (0.625x)", singleResist.join(" "));
+        if (doubleResist.length > 0) embed.addField("Resistances (0.391x)", doubleResist.join(" "));
+        if (tripleResist.length > 0) embed.addField("Resistances (0.244x)", tripleResist.join(" "))
+      }
+      else {
+        if (doubleWeak.length > 0) embed.addField("Weaknesses (4x)", doubleWeak.join(" "));
+        if (singleWeak.length > 0) embed.addField("Weaknesses (2x)", singleWeak.join(" "));
+        if (neutral.length > 0) embed.addField("Neutral (1x)", neutral.join(" "));
+        if (singleResist.length > 0) embed.addField("Resistances (0.5x)", singleResist.join(" "));
+        if (doubleResist.length > 0) embed.addField("Resistances (0.25x)", doubleResist.join(" "));
+        if (immune.length > 0) embed.addField("Immunities (0x)", immune.join(" "));
+      }
+    
+
+      message.channel.send(embed);
+
+      //let defenseProfileStr = "";
+      //defenseProfile.forEach(e => defenseProfileStr += `${e.type}: ${e.effectiveness} `);
+      //message.channel.send(`Defense profile for **${types.join("/")}** :\n${defenseProfileStr}`);
       break;
     }
   }
@@ -119,78 +177,6 @@ const typeColor = {
   "fairy": 0xD685AD //pink
 };
 
-async function convertToGoStats (client, stats, pokemon) { // returns {"stamina": 255, "attack": 255, "defense": 255, "LV40CP": 9000, "LV50CP": 10000}
-  const hp = stats.hp, 
-    atk = stats.atk, 
-    def = stats.def, 
-    spAtk = stats.spa, 
-    spDef = stats.spd, 
-    speed = stats.spe;
-
-  let stamina = 0, attack = 0, defense = 0, speedMult = 1;
-
-  let statsObj = {
-    "stamina": 0,
-    "attack": 0,
-    "defense": 0,
-    "uber": false, // true if initial cp is over 4000 and stats had to be adjusted, false otherwise
-    "lv40CP": 0,
-    "lv50CP": 0
-  };
-
-  let lv40CP = 0;
-  let adjustedlv40CP = 0;
-  let lv50CP = 0;
-
-  speedMult = 1 + (speed - 75) / 500; 
-
-  //Shedinja case
-  if (pokemon.name === "Shedinja") stamina = 1;
-  else stamina = Math.trunc(50 + 1.75 * hp);
-
-  attack = Math.round((0.25 * Math.min(atk, spAtk) + 1.75 * Math.max(atk, spAtk)) * speedMult);
-  defense = Math.round((0.75 * Math.min(def, spDef) + 1.25 * Math.max(def, spDef)) * speedMult);
-
-  const statsArr = [attack, defense, stamina];
-
-  lv40CP = Math.floor(Math.max(10, 
-    (Math.sqrt(stamina + 15) * (attack + 15) * Math.sqrt(defense + 15) * Math.pow(0.7903, 2) / 10)));
-  
-  // There is a stat adjustment put in place for pokemon over 4000 CP initally, to keep things from becoming too OP.
-  if (lv40CP > 4000) {
-    console.log("CP is greater than 4000. Adjusting CP.");
-    let baseFormeAdjust = true;
-    if ((pokemon.forme) && (pokemon.forme.includes("Mega"))) {
-      // We must see if the pokemon's base forme hits over 4000 CP first
-      const basePokemon = client.pokemonDb.find(p => p.name === pokemon.baseSpecies);
-      if (!basePokemon) {
-        console.error("Couldn't find the base pokemon. Something went seriously wrong here!");
-        statsObj = null;
-        return;
-      } 
-      const baseFormeStats = await convertToGoStats(basePokemon.baseStats, basePokemon);
-      // Make the adjustments to the new forme if the base forme hits over 4000 CP.
-      baseFormeAdjust = baseFormeStats.uber;
-    }
-    statsObj.uber = baseFormeAdjust;
-    if (statsObj.uber) {
-      const newStatsArr = statsArr.map(s => {
-        return Math.round(s * 0.91);
-      });
-
-      attack = newStatsArr[0], defense = newStatsArr[1], stamina = newStatsArr[2];
-      adjustedlv40CP = Math.floor(Math.max(10, 
-        (Math.sqrt(stamina + 15) * (attack + 15) * Math.sqrt(def + 15) * Math.pow(0.7903, 2) / 10)));
-    } 
-  }
-
-  if (adjustedlv40CP > 0) lv40CP = adjustedlv40CP;
-
-  lv50CP = Math.floor(Math.max(10, 
-    (Math.sqrt(stamina + 15) * (attack + 15) * Math.sqrt(defense + 15) * Math.pow(0.840300023555755, 2) / 10)));
-
-  statsObj.stamina = stamina, statsObj.attack = attack, statsObj.defense = defense;
-  statsObj.lv40CP = lv40CP, statsObj.lv50CP = lv50CP;
-
-  return statsObj;
-}
+const getTypeEmoji = (client, type) => {
+  return client.emojis.cache.find(e => e.name === `type${type.toLowerCase()}` && e.guild.id === "492830840309678091");
+};
