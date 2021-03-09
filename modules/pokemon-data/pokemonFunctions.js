@@ -193,12 +193,10 @@ module.exports = async (client) => {
 
     typeArr.forEach(t => {
       const type = t.toLowerCase();
-      if (client.typesDb.has(type)) {
-        const obj = client.typesDb.get(type);
-        for (let i = 0; i < attackers.length; i++) {
-          if (isGoRequest) attackers[i].effectiveness *= goDamage[obj.attackingTypes[i].effectiveness]; 
-          else attackers[i].effectiveness *= obj.attackingTypes[i].effectiveness; 
-        }
+      const obj = client.typesDb.get(type);
+      for (let i = 0; i < attackers.length; i++) {
+        if (isGoRequest) attackers[i].effectiveness *= goDamage[obj.attackingTypes[i].effectiveness]; 
+        else attackers[i].effectiveness *= obj.attackingTypes[i].effectiveness; 
       }
     });
 

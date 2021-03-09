@@ -80,7 +80,13 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
     }
     case "weakness": 
     case "weak": {
-      const types = args.slice(0, 2); // Only take the first two args.
+      let types = args.slice(0, 2); // Only take the first two args.
+      types.forEach(t => {
+        if (!Object.keys(typeColor).includes(t.toLowerCase())) types = null;
+      });
+
+      if (!types) return message.reply(`Couldn't understand one or more of the typings specified. Acceptable parameters: ${Object.keys(typeColor).join(", ").toProperCase()}`);
+
       const isGoRequest = message.flags[1] === "go";
       const defenseProfile = client.getDefenseProfile(types, isGoRequest);
       const doubleWeak = [];
@@ -91,9 +97,8 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
       const tripleResist = []; // Go only
       const immune = []; // MSG only
 
-      
+
       defenseProfile.forEach(t => {
-        console.log(t);
         const e = t.effectiveness;
         if (e === 4 || e === Math.pow(8/5, 2)) doubleWeak.push(`${getTypeEmoji(client, t.type)}`);
         else if (e === 2 || e === 8/5) singleWeak.push(`${getTypeEmoji(client, t.type)}`);
@@ -134,10 +139,6 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
     
 
       message.channel.send(embed);
-
-      //let defenseProfileStr = "";
-      //defenseProfile.forEach(e => defenseProfileStr += `${e.type}: ${e.effectiveness} `);
-      //message.channel.send(`Defense profile for **${types.join("/")}** :\n${defenseProfileStr}`);
       break;
     }
   }
