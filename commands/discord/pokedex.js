@@ -16,7 +16,8 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
     case "h":
       message.channel.send(`= ${this.help.name} = \n${this.help.description}\nusage:: ${this.help.usage}\naliases:: ${this.conf.aliases.join(", ")}\n= ${this.help.name} =`, {code:"asciidoc"});
       break;
-    case "pokemon": {
+    case "pokemon": 
+    case "pkm": {
       if (args.length < 1) return;
       const pokemon = client.pokedexSearch("pokemon", args.join(" ").toProperCase());
       if (!pokemon) return message.reply("Pokemon not found. Make sure it is spelled correctly.");
@@ -41,7 +42,7 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
 
       const embed = new MessageEmbed();
 
-      if (message.flags[1] === "go") {
+      if (message.flags[1] === "go" || message.flags[2] === "go") {
         goStats = await client.convertToGoStats(baseStats, pokemon);
         if (!goStats) return message.channel.send("Couldn't get Pokemon Go Stats. Something went terribly wrong.");
         const goStatsStr = `**Attack**: ${goStats.attack}\n**Defense**: ${goStats.defense}\n**Stamina**: ${goStats.stamina}`;
@@ -153,7 +154,7 @@ exports.help = {
   name: "pokedex",
   category: "Unknown",
   description: "Get info on pokemon and type matchups!",
-  usage: "Pokemon: pokedex [-pokemon] [pokemon]\nType Defense Profile: pokedex [-weak] [type1] [type2] - Only one type needs to be specified."
+  usage: "\nPokemon: pokedex [-pokemon|-pkm] [-go] [-shiny] [pokemon]. Go and shiny flags are optional, you can specify them in any order before the pokemon name. If the go flag is speficied, it will get stats from Pokemon GO. If the shiny flag is specified, the shiny Pokemon gif will be posted.\nType Defense Profile: pokedex [-weak] [-go] [type1] [type2] - Only one type needs to be specified. Go flag is optional, if specified before the type name it will get the type matchups as they are represented in Pokemon GO."
 };
 
 const typeColor = {
