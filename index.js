@@ -94,7 +94,9 @@ const init = async () => {
     client.on(eventName, event.bind(null, client));
   });
 
-  require("./modules/pokemon-data/pokemonFunctions.js")(client);
+  const pokemonFunctions = require("./modules/pokemon-data/pokemonFunctions.js");
+  pokemonFunctions.init();
+
 
   // Generate a cache of client permissions for pretty perm names in commands.
   client.levelCache = {};
@@ -106,7 +108,7 @@ const init = async () => {
   //await client.twitchEvent.helix.eventSub.deleteAllSubscriptions();
   //await client.eventListener.listen();
 
-  //require("./modules/eventListener")(client);
+  //require("./modules/twitch/eventListener")(client);
 
   // Here we login the client.
   client.login(client.config.discordToken);

@@ -1,4 +1,5 @@
 const { MessageEmbed, Client, Message } = require("discord.js");
+const pokemonFunctions = require("../../modules/pokemon-data/pokemonFunctions");
 
 /**
  * 
@@ -19,13 +20,31 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
     case "pokemon": 
     case "pkm": {
       if (args.length < 1) return;
-      const pokemon = client.pokedexSearch("pokemon", args.join(" ").toProperCase());
-      if (!pokemon) return message.reply("Pokemon not found. Make sure it is spelled correctly.");
+      const param = (!isNaN(parseInt(args[0], 10))) ? { pokemon: parseInt(args[0], 10) } : { pokemon: args.join(" ").toProperCase()};
+      
+      const pokemon = await pokemonFunctions.pokedexSearch("pokemon.info", param);
+      if (!pokemon) return message.reply("Couldn't find any Pokemon by that name. Make sure it's spelled correctly.");;
+      if (typeof pokemon === "string") return message.reply(pokemon);
+
       const baseStats = pokemon.baseStats;
       let goStats = {};
       const abilities = Object.entries(pokemon.abilities);
       const types = pokemon.types;
+      let genderRatios = "";
       let typeStr = "";
+      let evolutionFamily = [];
+
+      if (pokemon.gender) {
+        if (pokemon.gender === "M") genderRatios = "100% ♂\n0% ♀️";
+        else if (pokemon.gender === "F") genderRatios = "0% ♂\n100% ♀️";
+        else if (pokemon.gender === "N") genderRatios = "Genderless";
+      } else {
+        let maleRatio = pokemon.genderRatio.M * 100, femaleRatio = pokemon.genderRatio.F * 100;
+        // why 0 and not 0.5? I will change these json files dammit.
+        if (maleRatio === 0) maleRatio = 50;
+        if (femaleRatio === 0) femaleRatio = 50;
+        genderRatios = `${maleRatio}% ♂\n${femaleRatio}% ♀️`;
+      }
 
       console.log(baseStats);
 
@@ -43,7 +62,7 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
       const embed = new MessageEmbed();
 
       if (message.flags[1] === "go" || message.flags[2] === "go") {
-        goStats = await client.convertToGoStats(baseStats, pokemon);
+        goStats = await pokemonFunctions.convertToGoStats(baseStats, pokemon);
         if (!goStats) return message.channel.send("Couldn't get Pokemon Go Stats. Something went terribly wrong.");
         const goStatsStr = `**Attack**: ${goStats.attack}\n**Defense**: ${goStats.defense}\n**Stamina**: ${goStats.stamina}`;
         const maxCPStr = `**@L40**: ${goStats.lv40CP}\n**@L50**: ${goStats.lv50CP}`;
@@ -51,6 +70,7 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
           .addField("Base Stats", goStatsStr, true)
           .addField("Type", typeStr, true)
           .addField("Max CP", maxCPStr, true)
+          .addField("Gender Ratios", genderRatios, true)
           .setColor(typeColor[types[0].toLowerCase()])
           .setImage(pokemonGif);
       }
@@ -72,6 +92,7 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
           .addField("Base Stats", baseStatsStr, true)
           .addField("Type", typeStr, true)
           .addField("Abilities", abilitiesStr, true)
+          .addField("Gender Ratios", genderRatios, true)
           .setColor(typeColor[types[0].toLowerCase()])
           .setImage(pokemonGif);
       }
@@ -85,10 +106,15 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
         if (!Object.keys(typeColor).includes(t.toLowerCase())) types = null;
       });
 
+
       if (!types) return message.reply(`Couldn't understand one or more of the typings specified. Acceptable parameters: ${Object.keys(typeColor).join(", ").toProperCase()}`);
 
-      const isGoRequest = message.flags[1] === "go";
-      const defenseProfile = client.getDefenseProfile(types, isGoRequest);
+      const isInverse = message.flags.indexOf("inverse") >= 0;
+      const isGoRequest = message.flags.indexOf("go") >= 0 && !isInverse;
+      const defenseProfile = pokemonFunctions.getDefenseProfile(types, {isGoRequest, isInverse});
+
+      if (typeof defenseProfile === "string") return message.reply(defenseProfile);
+
       const doubleWeak = [];
       const singleWeak = [];
       const neutral = [];
@@ -96,7 +122,6 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
       const doubleResist = [];
       const tripleResist = []; // Go only
       const immune = []; // MSG only
-
 
       defenseProfile.forEach(t => {
         const e = t.effectiveness;
@@ -113,10 +138,12 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
       
 
       let title = `Defense profile for **${types.join("/")}**`;
-      types.forEach(t => title += ` ${getTypeEmoji(client, t)}`);
+      let footer = "";
+      if (isGoRequest) footer = "Pokemon Go Battle";
+      if (isInverse) footer = "Inverse Battle";
+      types.forEach(t => title += (` ${getTypeEmoji(client, t)}`));
 
-      // Go types = 8/5 - weak, 5/8 - res, 25/65 - double res 
-
+      embed.setFooter(footer || "Standard Battle");
       embed.setTitle(title);
       embed.setColor(typeColor[types[0].toLowerCase()]);
 
@@ -126,7 +153,7 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
         if (neutral.length > 0) embed.addField("Neutral (1x)", neutral.join(" "));
         if (singleResist.length > 0) embed.addField("Resistances (0.625x)", singleResist.join(" "));
         if (doubleResist.length > 0) embed.addField("Resistances (0.391x)", doubleResist.join(" "));
-        if (tripleResist.length > 0) embed.addField("Resistances (0.244x)", tripleResist.join(" "))
+        if (tripleResist.length > 0) embed.addField("Resistances (0.244x)", tripleResist.join(" "));
       }
       else {
         if (doubleWeak.length > 0) embed.addField("Weaknesses (4x)", doubleWeak.join(" "));
@@ -139,6 +166,12 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
     
 
       message.channel.send(embed);
+      break;
+    }
+    // Calculate stats of pokemon based on IVs. Bracketed options are optional. Format: -dex -stats "pokemon" level [nature] [HPIV/AtkIV/DefIV/SpAtkIV/SpDefIV/SpeedIV] [HPEV/AtkEV/DefEV/SpAtkEV/SpDefEV/SpeedEV]
+    case "stats": 
+    case "goStats": {
+      message.channel.send("WIP.");
       break;
     }
   }
@@ -155,7 +188,7 @@ exports.help = {
   name: "pokedex",
   category: "Unknown",
   description: "Get info on pokemon and type matchups!",
-  usage: "\nPokemon: pokedex [-pokemon|-pkm] [-go] [-shiny] [pokemon]. Go and shiny flags are optional, you can specify them in any order before the pokemon name. If the go flag is speficied, it will get stats from Pokemon GO. If the shiny flag is specified, the shiny Pokemon gif will be posted.\nType Defense Profile: pokedex [-weak] [-go] [type1] [type2] - Only one type needs to be specified. Go flag is optional, if specified before the type name it will get the type matchups as they are represented in Pokemon GO."
+  usage: "\nPokemon: pokedex [-pokemon|-pkm] [-go] [-shiny] [pokemon name|number]. Go and shiny flags are optional, you can specify them in any order before the pokemon name. If the go flag is speficied, it will get stats from Pokemon GO. If the shiny flag is specified, the shiny Pokemon gif will be posted.\nType Defense Profile: pokedex [-weak] [-go] [type1] [type2] - Only one type needs to be specified. Go flag is optional, if specified before the type name it will get the type matchups as they are represented in Pokemon GO."
 };
 
 const typeColor = {
