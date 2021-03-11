@@ -288,6 +288,7 @@ exports.pokemonDb = pokemonDb;
 exports.typesDb = typesDb;
 exports.pokedexSearch = pokedexSearch;
 exports.getDefenseProfile = getDefenseProfile;
+exports.convertToGoStats = convertToGoStats;
 exports.init = init;
 
 module.exports = exports;
