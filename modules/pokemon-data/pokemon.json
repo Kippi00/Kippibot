@@ -30103,7 +30103,7 @@
   "deoxysattack": {
     "num": 386,
     "name": "Deoxys-Attack",
-    "alias": "deoxysattack",
+    "alias": "deoxys-a",
     "sprite": "deoxys-attack",
     "types": ["Psychic"],
     "genderRatio": {
@@ -30162,7 +30162,7 @@
   "deoxysdefense": {
     "num": 386,
     "name": "Deoxys-Defense",
-    "alias": "deoxysdefense",
+    "alias": "deoxys-d",
     "sprite": "deoxys-defense",
     "types": ["Psychic"],
     "genderRatio": {
@@ -30221,7 +30221,7 @@
   "deoxysspeed": {
     "num": 386,
     "name": "Deoxys-Speed",
-    "alias": "deoxysspeed",
+    "alias": "deoxys-s",
     "sprite": "deoxys-speed",
     "types": ["Psychic"],
     "genderRatio": {

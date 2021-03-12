@@ -23,7 +23,7 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
       const param = (!isNaN(parseInt(args[0], 10))) ? { pokemon: parseInt(args[0], 10) } : { pokemon: args.join(" ").toProperCase()};
       
       const pokemon = await pokemonFunctions.pokedexSearch("pokemon.info", param);
-      if (!pokemon) return message.reply("Couldn't find any Pokemon by that name. Make sure it's spelled correctly.");;
+      if (!pokemon) return message.reply("Couldn't find any Pokemon by that name. Make sure it's spelled correctly. ");
       if (typeof pokemon === "string") return message.reply(pokemon);
 
       const baseStats = pokemon.baseStats;
@@ -34,15 +34,18 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
       let typeStr = "";
       let evolutionFamily = [];
 
+      //const evolutions = await pokemonFunctions.getEvolutionData(pokemon);
+
+      console.log(pokemon.otherFormes);
+
+      const formes = (pokemon.otherFormes.length > 0) ? pokemon.otherFormes.join(", ") : null;
+
       if (pokemon.gender) {
         if (pokemon.gender === "M") genderRatios = "100% ♂\n0% ♀️";
         else if (pokemon.gender === "F") genderRatios = "0% ♂\n100% ♀️";
         else if (pokemon.gender === "N") genderRatios = "Genderless";
       } else {
-        let maleRatio = pokemon.genderRatio.M * 100, femaleRatio = pokemon.genderRatio.F * 100;
-        // why 0 and not 0.5? I will change these json files dammit.
-        if (maleRatio === 0) maleRatio = 50;
-        if (femaleRatio === 0) femaleRatio = 50;
+        const maleRatio = pokemon.genderRatio.M * 100, femaleRatio = pokemon.genderRatio.F * 100;
         genderRatios = `${maleRatio}% ♂\n${femaleRatio}% ♀️`;
       }
 
@@ -92,7 +95,9 @@ exports.run = async (client, message, args) => { // eslint-disable-line no-unuse
           .addField("Base Stats", baseStatsStr, true)
           .addField("Type", typeStr, true)
           .addField("Abilities", abilitiesStr, true)
+          .addField("Height/Weight", `${pokemon.heightm} m/${pokemon.weightkg} kg`, true)
           .addField("Gender Ratios", genderRatios, true)
+          .addField("Other Formes", formes || "None", true)
           .setColor(typeColor[types[0].toLowerCase()])
           .setImage(pokemonGif);
       }
@@ -188,7 +193,7 @@ exports.help = {
   name: "pokedex",
   category: "Unknown",
   description: "Get info on pokemon and type matchups!",
-  usage: "\nPokemon: pokedex [-pokemon|-pkm] [-go] [-shiny] [pokemon name|number]. Go and shiny flags are optional, you can specify them in any order before the pokemon name. If the go flag is speficied, it will get stats from Pokemon GO. If the shiny flag is specified, the shiny Pokemon gif will be posted.\nType Defense Profile: pokedex [-weak] [-go] [type1] [type2] - Only one type needs to be specified. Go flag is optional, if specified before the type name it will get the type matchups as they are represented in Pokemon GO."
+  usage: "\nPokemon:: pokedex [-pokemon|-pkm] [-go] [-shiny] [pokemon name|number]. Go and shiny flags are optional, you can specify them in any order before the pokemon name. If the go flag is speficied, it will get stats from Pokemon GO. If the shiny flag is specified, the shiny Pokemon gif will be posted.\n\nNOTE on alternate formes: Specify an alternate forme by adding a dash to the end of the pokemon's name. Examples: Arceus-Dark, Deoxys-Speed, Raichu-Alola, Weezing-Galar, Castform-Rainy\n\nType Defense Profile:: pokedex [-weak] [-go] [type1] [type2] - Only one type needs to be specified. Go flag is optional, if specified before the type name it will get the type matchups as they are represented in Pokemon GO."
 };
 
 const typeColor = {

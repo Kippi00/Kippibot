@@ -5,6 +5,7 @@ const pokedexDir = "./modules/pokemon-data/";
 const Enmap = require("enmap");
 const fuzzysort = require("fuzzysort");
 
+
 const defaultTypes = [
   { type: "Bug", effectiveness: 1 },
   { type: "Dark", effectiveness: 1 },
@@ -31,21 +32,28 @@ const pkmObj = JSON.parse(fs.readFileSync(`${pokedexDir}/pokemon.json`));
  * @type {Enmap}
  */
 const pokemonDb = new Enmap(Object.entries(pkmObj));
-const pokemonNames = pokemonDb.map(p => p.name);
+const pokemonNames = pokemonDb.map(p => {
+  return {
+    "name": p.name,
+    "alias1": p.alias,
+    "alias2": p.sprite
+  };
+});
 
 /**
  * 
  * @param {string} name Requested name.
  * @returns {Promise<string|Object|null>}
  */
-const findPokemon = async (name, options = {limit: 50, allowTypo: true, threshold: -100}) => {
+const findPokemon = async (name, options = {limit: 50, allowTypo: true, threshold: -100, keys: ["name", "alias1", "alias2"]}) => {
   const results = await fuzzysort.goAsync(name, pokemonNames, options);
-  console.log(results);
   if (results.total < 1) return null;
-  if (results[0].score === 0) return results[0].target;
+  const bestResult = results[0];
+  //console.log(bestResult);
+  if (bestResult.score === 0) return bestResult.obj.name;
   return {
-    target: results[0].target,
-    score: results[0].score,
+    target: bestResult.obj.name,
+    score: bestResult.score,
     totalMatches: results.total
   };
 };
@@ -190,7 +198,7 @@ const convertToGoStats = async (stats, pokemon) => {
  * @returns {Promise<Object|String|null>} result An object containing either a pokemon or stats.
  */
 const pokedexSearch = async (type, param) => {
-  console.log(param);
+  //console.log(param);
   const pkmRequest = param.pokemon;
   const statRequest = param.stats;
   let result = null;
@@ -201,6 +209,7 @@ const pokedexSearch = async (type, param) => {
       else result = pokemonByNum;
     } else {
       const match = await findPokemon(pkmRequest);
+      console.log(match);
       if (!match) return null;
       if (typeof match === "object") {
         const score = Math.abs(match.score); // score -2 => 2
@@ -209,7 +218,7 @@ const pokedexSearch = async (type, param) => {
         else result = `Too many possible matches. Did you mean ${match.target}? (${matchPercent} sure)`;
       }
       if (typeof match === "string") {
-        const pokemon = pokemonDb.find(p => p.name === pkmRequest || p.alias === pkmRequest || p.sprite === pkmRequest);
+        const pokemon = pokemonDb.find(p => p.name === match);
         if (type === "pokemon.info") result = pokemon;
         else if (type === "pokemon.stats" ) result = await mainStatCalculation(pokemon, statRequest);
         else if (type === "pokemon.goStats") result = await goStatCalculation(pokemon, statRequest);
@@ -218,6 +227,23 @@ const pokedexSearch = async (type, param) => {
   }
   //console.log(result);
   return result;
+};
+
+/**
+ * 
+ * @param {Object} pokemon Pokemon object
+ * @returns {Promise<Object []>} evolutions Array of Pokemon Evolutions
+ */
+const getEvolutionData = async (pokemon) => {
+  let evolutions = [
+    {
+      "name": pokemon.name,
+      "form": 0
+    }
+
+
+  ];
+  return evolutions;
 };
 
 
@@ -289,6 +315,7 @@ exports.typesDb = typesDb;
 exports.pokedexSearch = pokedexSearch;
 exports.getDefenseProfile = getDefenseProfile;
 exports.convertToGoStats = convertToGoStats;
+exports.getEvolutionData = getEvolutionData;
 exports.init = init;
 
 module.exports = exports;
