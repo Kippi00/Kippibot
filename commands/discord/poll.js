@@ -105,7 +105,8 @@ exports.run = async (client, message, args, level) => { // eslint-disable-line n
       });
 
       const voters = new Collection();
-
+      
+      message.delete().catch(console.error);
       const msg = await channel.send(embedInit).catch(console.error);
       optionsArr.forEach(obj => {
         msg.react(obj.reaction);
