@@ -1,4 +1,4 @@
-const { MessageEmbed, Collection } = require("discord.js");
+const { MessageEmbed, Collection, MessageReaction, User, Client, Message } = require("discord.js");
 const moment = require("moment");
 const reactionTemplate = [
   "1️⃣", 
@@ -19,7 +19,14 @@ const durationMatch = {
   "d": "day(s)"
 };
 
-exports.run = async (client, message, args, level) => { // eslint-disable-line no-unused-vars
+/**
+ * 
+ * @param {Client} client 
+ * @param {Message} message 
+ * @param {String []} args 
+ * @returns {Promise<Message>}
+ */
+exports.run = async (client, message, args) => { // eslint-disable-line no-unused-vars
   switch (message.flags[0]) {
     case "create": {
       const allArgs = args.join(" ").split('"'); // eslint-disable-line quotes
@@ -113,17 +120,26 @@ exports.run = async (client, message, args, level) => { // eslint-disable-line n
       });
       msg.react("🛑");
 
+      /**
+       * 
+       * @param {MessageReaction} reaction 
+       * @param {User} user 
+       * @returns {boolean}
+       */
       const filter = async (reaction, user) => { // eslint-disable-line no-unused-vars
         const voter = voters.get(user.id);
-        if (reaction.emoji.name === "🛑" && user.id === message.author.id) {
-          closePoll();
+        if (reaction.emoji.name === "🛑" && user.id != client.user.id ) {
+          if (user.id === message.author.id || user.id === message.guild.ownerID) closePoll();
+          else reaction.users.remove(user.id);
         }
         if (reactions.indexOf(reaction.emoji.name) >= 0) {
           if (user.id !== client.user.id) {
             // Remove a users current reaction if they decide to change their vote.
             if (voter) {
               const r = await msg.reactions.cache.get(voter.option);
-              r.users.remove(user.id);
+              // This is here in case a user unreacts and reacts with the same emoji. 
+              // We should only remove their other reaction if it is different.
+              if (reaction.emoji.name !== voter.option) r.users.remove(user.id); 
               voters.set(user.id, {
                 id: user.id,
                 option: reaction.emoji.name
